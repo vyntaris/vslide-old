@@ -1,19 +1,19 @@
 [package]
-name = "slidecraft-render"
+name = "vslide-render"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "SlideCraft renderer: slides, layouts and masters to pixels (vello_cpu): fills, outlines, effects, pictures, text, tables, charts"
+description = "VSlide renderer: slides, layouts and masters to pixels (vello_cpu): fills, outlines, effects, pictures, text, tables, charts"
 
 [lints]
 workspace = true
 
 [dependencies]
-slidecraft-geom = { workspace = true }
-slidecraft-color = { workspace = true }
-slidecraft-model = { workspace = true }
-slidecraft-fonts = { workspace = true }
-slidecraft-text = { workspace = true }
+vslide-geom = { workspace = true }
+vslide-color = { workspace = true }
+vslide-model = { workspace = true }
+vslide-fonts = { workspace = true }
+vslide-text = { workspace = true }
 vello_cpu = { workspace = true }
 vello_common = { workspace = true }
 image = { workspace = true }

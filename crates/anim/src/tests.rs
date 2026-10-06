@@ -2,8 +2,8 @@
 
 use std::sync::Arc;
 
-use slidecraft_model::anim::{ANIMATIONS, TRANSITIONS, TextBuild};
-use slidecraft_model::{
+use vslide_model::anim::{ANIMATIONS, TRANSITIONS, TextBuild};
+use vslide_model::{
     AnimClass, AnimStart, Animation, ColorRef, CustomShow, Presentation, Rgba, Shape, ShapeId, Slide, SlideId, TextBody, Transition, Xfrm,
 };
 

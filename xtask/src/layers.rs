@@ -30,7 +30,7 @@ impl Class {
     }
 }
 
-/// The layering table. Names are package names without the `slidecraft-`
+/// The layering table. Names are package names without the `vslide-`
 /// prefix.
 pub const TABLE: &[(&str, Class)] = &[
     ("geom", Class::Layer(0)),
@@ -60,7 +60,7 @@ pub const TABLE: &[(&str, Class)] = &[
     ("mcp", Class::Layer(6)),
     ("testkit", Class::Testkit),
     // L7 apps and tooling
-    ("slidecraft", Class::Exempt),
+    ("vslide", Class::Exempt),
     ("cli", Class::Exempt),
     ("web", Class::Exempt),
     ("xtask", Class::Exempt),
@@ -89,7 +89,7 @@ pub const UI_CRATES: &[&str] = &["egui", "eframe", "winit", "egui_kittest", "rfd
 pub const UI_MIN_LAYER: u8 = 6;
 
 pub fn short_name(pkg: &str) -> &str {
-    pkg.strip_prefix("slidecraft-").unwrap_or(pkg)
+    pkg.strip_prefix("vslide-").unwrap_or(pkg)
 }
 
 pub fn classify(pkg: &str) -> Option<Class> {
@@ -147,7 +147,7 @@ impl std::fmt::Display for Violation {
                 write!(f, "{krate}: standalone crate must not depend on workspace crate {dep}")
             }
             Violation::TestkitAsNormalDep { krate } => {
-                write!(f, "{krate}: slidecraft-testkit may only be a dev-dependency")
+                write!(f, "{krate}: vslide-testkit may only be a dev-dependency")
             }
             Violation::UiBelowL6 { krate, dep, layer } => {
                 write!(f, "{krate} (L{layer}) depends on UI crate `{dep}`; UI toolkits are only allowed in L6+")
@@ -256,75 +256,75 @@ mod tests {
     #[test]
     fn clean_downward_graph_passes() {
         let g = [
-            c("slidecraft-geom", &[("kurbo", Normal, false)]),
-            c("slidecraft-model", &[("slidecraft-geom", Normal, true)]),
-            c("slidecraft-engine", &[("slidecraft-model", Normal, true), ("slidecraft-testkit", Dev, true)]),
-            c("slidecraft-ui-egui", &[("slidecraft-engine", Normal, true), ("egui", Normal, false)]),
-            c("slidecraft-cli", &[("slidecraft-ui-egui", Normal, true)]),
+            c("vslide-geom", &[("kurbo", Normal, false)]),
+            c("vslide-model", &[("vslide-geom", Normal, true)]),
+            c("vslide-engine", &[("vslide-model", Normal, true), ("vslide-testkit", Dev, true)]),
+            c("vslide-ui-egui", &[("vslide-engine", Normal, true), ("egui", Normal, false)]),
+            c("vslide-cli", &[("vslide-ui-egui", Normal, true)]),
         ];
         assert!(check(&g).is_empty(), "{:?}", check(&g));
     }
 
     #[test]
     fn upward_dependency_flagged() {
-        let v = check(&[c("slidecraft-model", &[("slidecraft-engine", Normal, true)])]);
+        let v = check(&[c("vslide-model", &[("vslide-engine", Normal, true)])]);
         assert!(matches!(v[..], [Violation::Upward { from: 1, to: 5, .. }]));
     }
 
     #[test]
     fn sideways_dependency_flagged() {
-        let v = check(&[c("slidecraft-text", &[("slidecraft-anim", Normal, true)])]);
+        let v = check(&[c("vslide-text", &[("vslide-anim", Normal, true)])]);
         assert!(matches!(v[..], [Violation::Upward { from: 2, to: 2, .. }]));
     }
 
     #[test]
     fn l0_foundations_are_independent() {
-        let v = check(&[c("slidecraft-geom", &[("slidecraft-color", Normal, true)])]);
+        let v = check(&[c("vslide-geom", &[("vslide-color", Normal, true)])]);
         assert!(matches!(v[..], [Violation::Upward { from: 0, to: 0, .. }]));
     }
 
     #[test]
     fn self_dev_dependency_ignored() {
-        assert!(check(&[c("slidecraft-model", &[("slidecraft-model", Dev, true)])]).is_empty());
+        assert!(check(&[c("vslide-model", &[("vslide-model", Dev, true)])]).is_empty());
     }
 
     #[test]
     fn upward_dev_dependency_flagged() {
-        let v = check(&[c("slidecraft-geom", &[("slidecraft-model", Dev, true)])]);
+        let v = check(&[c("vslide-geom", &[("vslide-model", Dev, true)])]);
         assert!(matches!(v[..], [Violation::Upward { kind: Dev, .. }]));
     }
 
     #[test]
     fn ui_crates_below_l6_flagged() {
         for dep in ["egui", "eframe", "winit", "egui_kittest", "rfd", "bevy_ecs", "bevy"] {
-            let v = check(&[c("slidecraft-engine", &[(dep, Normal, false)])]);
+            let v = check(&[c("vslide-engine", &[(dep, Normal, false)])]);
             assert!(matches!(v[..], [Violation::UiBelowL6 { layer: 5, .. }]), "{dep}");
         }
-        assert!(check(&[c("slidecraft-engine", &[("egui_extras_not", Normal, false)])]).is_empty());
-        assert!(check(&[c("slidecraft-mcp", &[("winit", Normal, false)])]).is_empty());
+        assert!(check(&[c("vslide-engine", &[("egui_extras_not", Normal, false)])]).is_empty());
+        assert!(check(&[c("vslide-mcp", &[("winit", Normal, false)])]).is_empty());
     }
 
     #[test]
     fn unregistered_crate_is_error() {
-        let v = check(&[c("slidecraft-mystery", &[])]);
-        assert!(matches!(&v[..], [Violation::Unregistered { krate }] if krate == "slidecraft-mystery"));
+        let v = check(&[c("vslide-mystery", &[])]);
+        assert!(matches!(&v[..], [Violation::Unregistered { krate }] if krate == "vslide-mystery"));
         assert!(v[0].to_string().contains("register"));
     }
 
     #[test]
     fn testkit_only_as_dev_dependency() {
-        let v = check(&[c("slidecraft-render", &[("slidecraft-testkit", Normal, true)])]);
+        let v = check(&[c("vslide-render", &[("vslide-testkit", Normal, true)])]);
         assert!(matches!(v[..], [Violation::TestkitAsNormalDep { .. }]));
-        assert!(check(&[c("slidecraft-render", &[("slidecraft-testkit", Dev, true)])]).is_empty());
+        assert!(check(&[c("vslide-render", &[("vslide-testkit", Dev, true)])]).is_empty());
         // testkit itself may use anything up to L5 but not L6 crates.
-        assert!(check(&[c("slidecraft-testkit", &[("slidecraft-engine", Normal, true)])]).is_empty());
-        assert!(!check(&[c("slidecraft-testkit", &[("slidecraft-ui-egui", Normal, true)])]).is_empty());
+        assert!(check(&[c("vslide-testkit", &[("vslide-engine", Normal, true)])]).is_empty());
+        assert!(!check(&[c("vslide-testkit", &[("vslide-ui-egui", Normal, true)])]).is_empty());
     }
 
     #[test]
     fn apps_and_xtask_exempt() {
-        for app in ["slidecraft", "slidecraft-cli", "slidecraft-web", "xtask"] {
-            assert!(check(&[c(app, &[("egui", Normal, false), ("slidecraft-ui-egui", Normal, true)])]).is_empty());
+        for app in ["vslide", "vslide-cli", "vslide-web", "xtask"] {
+            assert!(check(&[c(app, &[("egui", Normal, false), ("vslide-ui-egui", Normal, true)])]).is_empty());
         }
     }
 
@@ -332,17 +332,17 @@ mod tests {
     fn metadata_parsing() {
         let meta: Value = serde_json::from_str(
             r#"{"packages":[
-                {"name":"slidecraft-model","dependencies":[
-                    {"name":"slidecraft-geom","kind":null,"path":"/x/crates/geom"},
+                {"name":"vslide-model","dependencies":[
+                    {"name":"vslide-geom","kind":null,"path":"/x/crates/geom"},
                     {"name":"serde","kind":null},
                     {"name":"proptest","kind":"dev"}]},
-                {"name":"slidecraft-geom","dependencies":[]}
+                {"name":"vslide-geom","dependencies":[]}
             ]}"#,
         )
         .unwrap();
         let g = from_metadata(&meta).unwrap();
         assert_eq!(g.len(), 2);
-        let doc = g.iter().find(|c| c.name == "slidecraft-model").unwrap();
+        let doc = g.iter().find(|c| c.name == "vslide-model").unwrap();
         assert!(doc.deps[0].workspace && !doc.deps[1].workspace);
         assert_eq!(doc.deps[2].kind, Dev);
         assert!(check(&g).is_empty());

@@ -1,0 +1,19 @@
+[package]
+name = "vslide-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "VSlide on the command line: render, convert, run commands, inspect, and serve MCP"
+publish = false
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "vslide-cli"
+path = "src/main.rs"
+
+[dependencies]
+vslide-engine = { workspace = true }
+vslide-mcp = { workspace = true }
+serde_json = { workspace = true }

@@ -1,8 +1,8 @@
 //! Theme parts.
 
-use slidecraft_color::SchemeSlot;
-use slidecraft_model::style::{ColorRef, Effects, Fill};
-use slidecraft_model::theme::{FontSet, Theme, default_format};
+use vslide_color::SchemeSlot;
+use vslide_model::style::{ColorRef, Effects, Fill};
+use vslide_model::theme::{FontSet, Theme, default_format};
 
 use super::{Exp, Out, dml};
 use crate::opc::{NS_A, NS_R};

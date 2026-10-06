@@ -1,6 +1,6 @@
 //! Morph: matching shapes between two slides and interpolating their boxes.
 
-use slidecraft_model::{Shape, ShapeId, Slide, Xfrm};
+use vslide_model::{Shape, ShapeId, Slide, Xfrm};
 
 use crate::clampf;
 

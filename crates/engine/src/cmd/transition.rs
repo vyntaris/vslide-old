@@ -2,9 +2,9 @@
 
 use std::sync::Arc;
 
+use vslide_model::Transition;
+use vslide_model::anim::TRANSITIONS;
 use serde_json::{Value, json};
-use slidecraft_model::Transition;
-use slidecraft_model::anim::TRANSITIONS;
 
 use super::*;
 use crate::{Result, Session};

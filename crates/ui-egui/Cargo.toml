@@ -1,23 +1,23 @@
 [package]
-name = "slidecraft-ui-egui"
+name = "vslide-ui-egui"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "SlideCraft egui frontend (PowerPoint-style UI); swappable — nothing below depends on it"
+description = "VSlide egui frontend (PowerPoint-style UI); swappable — nothing below depends on it"
 
 [lints]
 workspace = true
 
 [dependencies]
-slidecraft-geom = { workspace = true }
-slidecraft-color = { workspace = true }
-slidecraft-model = { workspace = true }
-slidecraft-fonts = { workspace = true }
-slidecraft-text = { workspace = true }
-slidecraft-render = { workspace = true }
-slidecraft-anim = { workspace = true }
-slidecraft-engine = { workspace = true }
-slidecraft-media = { workspace = true }
+vslide-geom = { workspace = true }
+vslide-color = { workspace = true }
+vslide-model = { workspace = true }
+vslide-fonts = { workspace = true }
+vslide-text = { workspace = true }
+vslide-render = { workspace = true }
+vslide-anim = { workspace = true }
+vslide-engine = { workspace = true }
+vslide-media = { workspace = true }
 egui = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

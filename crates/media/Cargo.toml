@@ -1,22 +1,22 @@
 [package]
-name = "slidecraft-media"
+name = "vslide-media"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "SlideCraft media: probing, audio decoding (MP3, AAC/M4A, WAV, AIFF, FLAC, ALAC, Vorbis, Opus) to f32 PCM, H.264/HEVC/VP9/AV1 video decoding, poster frames, trim/fade/volume and the playback mixer and clock"
+description = "VSlide media: probing, audio decoding (MP3, AAC/M4A, WAV, AIFF, FLAC, ALAC, Vorbis, Opus) to f32 PCM, H.264/HEVC/VP9/AV1 video decoding, poster frames, trim/fade/volume and the playback mixer and clock"
 
 [lints]
 workspace = true
 
 [dependencies]
-slidecraft-isobmff = { workspace = true }
-slidecraft-matroska = { workspace = true }
-slidecraft-ogg = { workspace = true }
-slidecraft-opus = { workspace = true }
-slidecraft-h264 = { workspace = true }
-slidecraft-hevc = { workspace = true }
-slidecraft-vp9 = { workspace = true }
-slidecraft-av1 = { workspace = true }
+vslide-isobmff = { workspace = true }
+vslide-matroska = { workspace = true }
+vslide-ogg = { workspace = true }
+vslide-opus = { workspace = true }
+vslide-h264 = { workspace = true }
+vslide-hevc = { workspace = true }
+vslide-vp9 = { workspace = true }
+vslide-av1 = { workspace = true }
 thiserror = { workspace = true }
 log = { workspace = true }
 image = { workspace = true }

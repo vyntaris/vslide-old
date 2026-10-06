@@ -1,8 +1,8 @@
 //! Theme parts (`a:theme`).
 
-use slidecraft_color::{ColorScheme, Rgba, SchemeSlot};
-use slidecraft_model::style::{ColorBase, Effects};
-use slidecraft_model::theme::{FontScheme, FontSet, FormatScheme, Theme, default_format};
+use vslide_color::{ColorScheme, Rgba, SchemeSlot};
+use vslide_model::style::{ColorBase, Effects};
+use vslide_model::theme::{FontScheme, FontSet, FormatScheme, Theme, default_format};
 
 use super::{Imp, Part, dml};
 use crate::xml::El;
@@ -22,7 +22,7 @@ pub fn read_theme(imp: &mut Imp, part: &Part, root: &El) -> Theme {
                 let rgb = match c.base {
                     ColorBase::Rgb { rgb } => rgb,
                     ColorBase::System { last, .. } => last,
-                    ColorBase::Preset { name } => slidecraft_color::preset(&name).unwrap_or(Rgba::BLACK),
+                    ColorBase::Preset { name } => vslide_color::preset(&name).unwrap_or(Rgba::BLACK),
                     ColorBase::Scheme { .. } => continue,
                 };
                 scheme.set(slot, rgb);

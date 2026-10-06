@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Build, sign and (optionally) notarize the macOS release artifacts:
 #
-#   $DIST/slidecraft-<version>-macos-<arch>.dmg          SlideCraft.app on a drag-to-Applications DMG
-#   $DIST/slidecraft-cli-<version>-macos-<arch>.zip      the headless CLI
+#   $DIST/vslide-<version>-macos-<arch>.dmg          VSlide.app on a drag-to-Applications DMG
+#   $DIST/vslide-cli-<version>-macos-<arch>.zip      the headless CLI
 #
 # Usage: packaging/macos/package.sh [--arch universal|aarch64|x86_64] [--skip-build]
 #
@@ -39,9 +39,9 @@ export MACOSX_DEPLOYMENT_TARGET=11.0
 IDENTITY="${MACOS_SIGN_IDENTITY:--}"
 SHORT_VERSION="${VERSION%%-*}"
 WORK="$CARGO_TARGET_DIR/macos-package"
-APP="$WORK/SlideCraft.app"
-DMG="$DIST/slidecraft-$VERSION-macos-$ARCH.dmg"
-CLI_ZIP="$DIST/slidecraft-cli-$VERSION-macos-$ARCH.zip"
+APP="$WORK/VSlide.app"
+DMG="$DIST/vslide-$VERSION-macos-$ARCH.dmg"
+CLI_ZIP="$DIST/vslide-cli-$VERSION-macos-$ARCH.zip"
 
 NOTARIZE=0
 if [ "$IDENTITY" = "-" ]; then
@@ -52,18 +52,18 @@ else
   warn "macOS: APPLE_ID / APPLE_PASSWORD / APPLE_TEAM_ID incomplete; signed but not notarized"
 fi
 
-echo "==> SlideCraft $VERSION for macOS ($ARCH), identity: $IDENTITY, notarize: $NOTARIZE"
+echo "==> VSlide $VERSION for macOS ($ARCH), identity: $IDENTITY, notarize: $NOTARIZE"
 
 # ---- build -------------------------------------------------------------------------------------
 if [ "$SKIP_BUILD" = 0 ]; then
   args=()
   for t in "${TARGETS[@]}"; do args+=(--target "$t"); done
-  (cd "$ROOT" && cargo build --release --locked -p slidecraft -p slidecraft-cli "${args[@]}")
+  (cd "$ROOT" && cargo build --release --locked -p vslide -p vslide-cli "${args[@]}")
 fi
 
 rm -rf "$WORK"
 mkdir -p "$WORK/bin"
-for bin in slidecraft slidecraft-cli; do
+for bin in vslide vslide-cli; do
   inputs=()
   for t in "${TARGETS[@]}"; do inputs+=("$CARGO_TARGET_DIR/$t/release/$bin"); done
   lipo -create -output "$WORK/bin/$bin" "${inputs[@]}"
@@ -97,29 +97,29 @@ notarize() {
   fi
 }
 
-# ---- SlideCraft.app ----------------------------------------------------------------------------
+# ---- VSlide.app ----------------------------------------------------------------------------
 echo "==> assembling $APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 # Executable and icon carry the display name (CFBundleExecutable / CFBundleIconFile).
-cp "$WORK/bin/slidecraft" "$APP/Contents/MacOS/SlideCraft"
-cp "$ROOT/assets/app-icon/slidecraft.icns" "$APP/Contents/Resources/SlideCraft.icns"
+cp "$WORK/bin/vslide" "$APP/Contents/MacOS/VSlide"
+cp "$ROOT/assets/app-icon/vslide.icns" "$APP/Contents/Resources/VSlide.icns"
 # Licences of the embedded craft-fonts fonts (only when built with CRAFT_FONTS_DIR).
 copy_font_licences "$APP/Contents/Resources"
 sed -e "s/@VERSION@/$VERSION/g" -e "s/@SHORT_VERSION@/$SHORT_VERSION/g" \
-  -e "s/@BUILD_SHA@/${SLIDECRAFT_BUILD_SHA:-unknown}/g" \
+  -e "s/@BUILD_SHA@/${VSLIDE_BUILD_SHA:-unknown}/g" \
   "$HERE/Info.plist.in" >"$APP/Contents/Info.plist"
 plutil -lint "$APP/Contents/Info.plist"
 printf 'APPL????' >"$APP/Contents/PkgInfo"
 
 # Sign inside-out: nested code first, then the bundle itself (no --deep on the final signature).
 # Today the only nested code is the main executable; frameworks/helpers would be signed here too.
-sign --options runtime --entitlements "$HERE/entitlements.plist" "$APP/Contents/MacOS/SlideCraft"
+sign --options runtime --entitlements "$HERE/entitlements.plist" "$APP/Contents/MacOS/VSlide"
 sign --options runtime --entitlements "$HERE/entitlements.plist" "$APP"
 codesign --verify --strict --deep --verbose=2 "$APP"
 
 if [ "$NOTARIZE" = 1 ]; then
-  ditto -c -k --keepParent "$APP" "$WORK/SlideCraft-notarize.zip"
-  notarize "$WORK/SlideCraft-notarize.zip"
+  ditto -c -k --keepParent "$APP" "$WORK/VSlide-notarize.zip"
+  notarize "$WORK/VSlide-notarize.zip"
   xcrun stapler staple "$APP"
   xcrun stapler validate "$APP"
   spctl --assess --type execute -vvv "$APP"
@@ -129,12 +129,12 @@ fi
 echo "==> building $DMG"
 STAGE="$WORK/dmg"
 mkdir -p "$STAGE"
-ditto "$APP" "$STAGE/SlideCraft.app"
+ditto "$APP" "$STAGE/VSlide.app"
 ln -s /Applications "$STAGE/Applications"
 rm -f "$DMG" "$WORK/raw.dmg"
 # makehybrid + convert builds the image without attaching a device, unlike `create -srcfolder`,
 # which is flaky on CI runners ("Resource busy") and hangs in sandboxed sessions.
-hdiutil makehybrid -hfs -hfs-volume-name "SlideCraft $VERSION" -hfs-openfolder "$STAGE" -o "$WORK/raw.dmg" "$STAGE"
+hdiutil makehybrid -hfs -hfs-volume-name "VSlide $VERSION" -hfs-openfolder "$STAGE" -o "$WORK/raw.dmg" "$STAGE"
 hdiutil convert "$WORK/raw.dmg" -format UDZO -imagekey zlib-level=9 -o "$DMG"
 rm -f "$WORK/raw.dmg"
 sign "$DMG"
@@ -148,17 +148,17 @@ fi
 
 # ---- CLI ---------------------------------------------------------------------------------------
 echo "==> building $CLI_ZIP"
-CLI_DIR="$WORK/slidecraft-cli-$VERSION-macos-$ARCH"
+CLI_DIR="$WORK/vslide-cli-$VERSION-macos-$ARCH"
 mkdir -p "$CLI_DIR"
-cp "$WORK/bin/slidecraft-cli" "$CLI_DIR/"
+cp "$WORK/bin/vslide-cli" "$CLI_DIR/"
 copy_docs "$CLI_DIR"
-sign --options runtime "$CLI_DIR/slidecraft-cli"
-codesign --verify --strict --verbose=2 "$CLI_DIR/slidecraft-cli"
+sign --options runtime "$CLI_DIR/vslide-cli"
+codesign --verify --strict --verbose=2 "$CLI_DIR/vslide-cli"
 rm -f "$CLI_ZIP"
 ditto -c -k --keepParent "$CLI_DIR" "$CLI_ZIP"
 # A bare Mach-O can't carry a stapled ticket; Gatekeeper looks the notarization up online.
 if [ "$NOTARIZE" = 1 ]; then notarize "$CLI_ZIP"; fi
 
-"$WORK/bin/slidecraft-cli" --version
+"$WORK/bin/vslide-cli" --version
 echo "==> done"
 ls -lh "$DMG" "$CLI_ZIP"

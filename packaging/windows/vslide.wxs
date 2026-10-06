@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  VSlide MSI (WiX Toolset v5: `dotnet tool install -g wix`). Built by package.ps1:
+
+    wix build vslide.wxs -arch x64 -d Version=1.2.3 -d BinDir=... -d IconPath=... -o out.msi
+
+  Per-machine install into Program Files, a Start Menu shortcut, `.vslide` owned by
+  VSlide, and VSlide offered under "Open with" for .pptx/.potx/.ppsx (without taking over
+  the user's default app for them).
+
+  UpgradeCode is fixed for VSlide forever (playbook §6); never change it.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+      Name="VSlide"
+      Manufacturer="Learning Machines LLC"
+      Version="$(var.Version)"
+      UpgradeCode="6F9C69E7-7825-40D2-BF26-C274DA676425"
+      Scope="perMachine"
+      Compressed="yes"
+      Language="1033">
+    <SummaryInformation Description="VSlide presentations and slide shows" Manufacturer="Learning Machines LLC" />
+    <!-- Same-version upgrades let successive pre-releases of one X.Y.Z replace each other
+         (MSI versions are numeric, so 1.2.3-rc.1 and 1.2.3-rc.2 are both 1.2.3). -->
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+        DowngradeErrorMessage="A newer version of VSlide is already installed." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <Icon Id="VslideIcon.ico" SourceFile="$(var.IconPath)" />
+    <Property Id="ARPPRODUCTICON" Value="VslideIcon.ico" />
+    <Property Id="ARPURLINFOABOUT" Value="https://getartcraft.com/apps/vslide" />
+    <Property Id="ARPURLUPDATEINFO" Value="https://getartcraft.com/apps/vslide" />
+    <Property Id="ARPHELPLINK" Value="https://discord.gg/artcraft" />
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="VSlide" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder" />
+
+    <Feature Id="Main" Title="VSlide" Level="1">
+      <ComponentGroupRef Id="VslideFiles" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="VslideFiles" Directory="INSTALLFOLDER">
+      <Component Id="VslideApp" Guid="D87EA444-41A4-4C19-922E-66D1A29461FF">
+        <File Id="VslideExe" Source="$(var.BinDir)\vslide.exe" KeyPath="yes">
+          <Shortcut Id="StartMenuShortcut" Directory="ProgramMenuFolder" Name="VSlide"
+              Description="VSlide presentations and slide shows" WorkingDirectory="INSTALLFOLDER" Advertise="yes"
+              Icon="VslideIcon.ico" IconIndex="0" />
+        </File>
+
+        <!-- .vslide: VSlide's own format. -->
+        <ProgId Id="VSlide.Presentation" Description="VSlide Presentation" Icon="VslideExe" IconIndex="0">
+          <Extension Id="vslide" ContentType="application/x-vslide">
+            <Verb Id="open" Command="Open" TargetFile="VslideExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+
+        <!-- "Open with" for PowerPoint formats, without becoming the default. -->
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\vslide.exe" Name="FriendlyAppName" Value="VSlide" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\vslide.exe\shell\open\command" Value="&quot;[#VslideExe]&quot; &quot;%1&quot;" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\vslide.exe\SupportedTypes" Name=".vslide" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\vslide.exe\SupportedTypes" Name=".pptx" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\vslide.exe\SupportedTypes" Name=".potx" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\Applications\vslide.exe\SupportedTypes" Name=".ppsx" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.pptx\OpenWithProgids" Name="VSlide.Presentation" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.potx\OpenWithProgids" Name="VSlide.Presentation" Value="" Type="string" />
+        <RegistryValue Root="HKLM" Key="Software\Classes\.ppsx\OpenWithProgids" Name="VSlide.Presentation" Value="" Type="string" />
+
+        <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\App Paths\vslide.exe" Value="[#VslideExe]" Type="string" />
+      </Component>
+
+      <Component Id="VslideCli">
+        <File Id="VslideCliExe" Source="$(var.BinDir)\vslide-cli.exe" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

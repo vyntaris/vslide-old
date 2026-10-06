@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Build and package SlideCraft for FreeBSD:
+# Build and package VSlide for FreeBSD:
 #
-#   $DIST/slidecraft-<version>-freebsd-<arch>.tar.gz   bin/, share/ (desktop entry, icons, AppStream)
+#   $DIST/vslide-<version>-freebsd-<arch>.tar.gz   bin/, share/ (desktop entry, icons, AppStream)
 #
 # Usage: packaging/freebsd/package.sh [--skip-build]
 #
@@ -11,10 +11,10 @@ set -euo pipefail
 # shellcheck source=../common.sh
 . "$(dirname "${BASH_SOURCE[0]}")/../common.sh"
 LINUX="$ROOT/packaging/linux"
-APP_ID=ai.storyteller.slidecraft
+APP_ID=ai.storyteller.vslide
 
 if [ "${1:-}" != "--skip-build" ]; then
-  (cd "$ROOT" && cargo build --release --locked -p slidecraft -p slidecraft-cli)
+  (cd "$ROOT" && cargo build --release --locked -p vslide -p vslide-cli)
 fi
 
 ARCH="$(uname -m)"
@@ -23,22 +23,22 @@ case "$ARCH" in
   arm64) ARCH=aarch64 ;;
 esac
 BIN="$CARGO_TARGET_DIR/release"
-NAME="slidecraft-$VERSION-freebsd-$ARCH"
+NAME="vslide-$VERSION-freebsd-$ARCH"
 WORK="$CARGO_TARGET_DIR/freebsd-package"
 STAGE="$WORK/$NAME"
 rm -rf "$WORK"
-mkdir -p "$STAGE/bin" "$STAGE/share/applications" "$STAGE/share/metainfo" "$STAGE/share/mime/packages" "$STAGE/share/icons" "$STAGE/share/doc/slidecraft"
+mkdir -p "$STAGE/bin" "$STAGE/share/applications" "$STAGE/share/metainfo" "$STAGE/share/mime/packages" "$STAGE/share/icons" "$STAGE/share/doc/vslide"
 
-install -m 755 "$BIN/slidecraft" "$BIN/slidecraft-cli" "$STAGE/bin/"
-strip "$STAGE/bin/slidecraft" "$STAGE/bin/slidecraft-cli" 2>/dev/null || true
+install -m 755 "$BIN/vslide" "$BIN/vslide-cli" "$STAGE/bin/"
+strip "$STAGE/bin/vslide" "$STAGE/bin/vslide-cli" 2>/dev/null || true
 install -m 644 "$LINUX/$APP_ID.desktop" "$STAGE/share/applications/"
 install -m 644 "$LINUX/$APP_ID.mime.xml" "$STAGE/share/mime/packages/$APP_ID.xml"
-sed -e "s/@VERSION@/$VERSION/g" -e "s/@DATE@/$SLIDECRAFT_BUILD_DATE/g" \
+sed -e "s/@VERSION@/$VERSION/g" -e "s/@DATE@/$VSLIDE_BUILD_DATE/g" \
   "$LINUX/$APP_ID.metainfo.xml.in" >"$STAGE/share/metainfo/$APP_ID.metainfo.xml"
 cp -R "$ROOT/assets/app-icon/hicolor" "$STAGE/share/icons/"
-copy_docs "$STAGE/share/doc/slidecraft"
+copy_docs "$STAGE/share/doc/vslide"
 
 tar -C "$WORK" -czf "$DIST/$NAME.tar.gz" "$NAME"
-"$STAGE/bin/slidecraft-cli" --version
+"$STAGE/bin/vslide-cli" --version
 echo "wrote $DIST/$NAME.tar.gz"
 ls -lh "$DIST/$NAME.tar.gz"

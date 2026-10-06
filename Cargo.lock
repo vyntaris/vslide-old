@@ -865,6 +865,302 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c87e182de0887fd5361989c677c4e8f5000cd9491d6d563161a8f3a5519fc7f"
 
 [[package]]
+name = "vslide"
+version = "0.1.0"
+dependencies = [
+ "arboard",
+ "cpal",
+ "vslide-engine",
+ "vslide-media",
+ "vslide-ui-egui",
+ "eframe",
+ "egui",
+ "image",
+ "log",
+ "rfd",
+ "serde_json",
+ "winit",
+ "winresource",
+]
+
+[[package]]
+name = "vslide-anim"
+version = "0.1.0"
+dependencies = [
+ "vslide-geom",
+ "vslide-model",
+ "serde",
+]
+
+[[package]]
+name = "vslide-av1"
+version = "0.1.0"
+dependencies = [
+ "vslide-bitstream",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "vslide-bitstream"
+version = "0.1.0"
+dependencies = [
+ "proptest",
+]
+
+[[package]]
+name = "vslide-cli"
+version = "0.1.0"
+dependencies = [
+ "vslide-engine",
+ "vslide-mcp",
+ "serde_json",
+]
+
+[[package]]
+name = "vslide-color"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "vslide-engine"
+version = "0.1.0"
+dependencies = [
+ "vslide-color",
+ "vslide-fonts",
+ "vslide-format",
+ "vslide-geom",
+ "vslide-media",
+ "vslide-model",
+ "vslide-pdf",
+ "vslide-pptx",
+ "vslide-render",
+ "vslide-text",
+ "i_overlay",
+ "image",
+ "log",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "vslide-fonts"
+version = "0.1.0"
+dependencies = [
+ "epaint_default_fonts",
+ "harfrust 0.13.3",
+ "kurbo",
+ "log",
+ "skrifa 0.47.0",
+ "unicode-bidi",
+]
+
+[[package]]
+name = "vslide-format"
+version = "0.1.0"
+dependencies = [
+ "vslide-model",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "zip",
+]
+
+[[package]]
+name = "vslide-geom"
+version = "0.1.0"
+dependencies = [
+ "kurbo",
+ "serde",
+]
+
+[[package]]
+name = "vslide-h264"
+version = "0.1.0"
+dependencies = [
+ "vslide-bitstream",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "vslide-hevc"
+version = "0.1.0"
+dependencies = [
+ "vslide-bitstream",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "vslide-isobmff"
+version = "0.1.0"
+dependencies = [
+ "vslide-bitstream",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "vslide-matroska"
+version = "0.1.0"
+
+[[package]]
+name = "vslide-mcp"
+version = "0.1.0"
+dependencies = [
+ "vslide-engine",
+ "vslide-render",
+ "log",
+ "serde_json",
+]
+
+[[package]]
+name = "vslide-media"
+version = "0.1.0"
+dependencies = [
+ "vslide-av1",
+ "vslide-h264",
+ "vslide-hevc",
+ "vslide-isobmff",
+ "vslide-matroska",
+ "vslide-ogg",
+ "vslide-opus",
+ "vslide-vp9",
+ "image",
+ "log",
+ "symphonia",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "vslide-model"
+version = "0.1.0"
+dependencies = [
+ "vslide-color",
+ "vslide-geom",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "vslide-ogg"
+version = "0.1.0"
+
+[[package]]
+name = "vslide-opus"
+version = "0.1.0"
+
+[[package]]
+name = "vslide-pdf"
+version = "0.1.0"
+dependencies = [
+ "vslide-fonts",
+ "vslide-model",
+ "vslide-render",
+ "vslide-text",
+ "krilla",
+ "kurbo",
+ "log",
+ "serde",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "vslide-pptx"
+version = "0.1.0"
+dependencies = [
+ "vslide-color",
+ "vslide-engine",
+ "vslide-geom",
+ "vslide-model",
+ "image",
+ "log",
+ "quick-xml 0.38.4",
+ "serde_json",
+ "thiserror 2.0.21",
+ "zip",
+]
+
+[[package]]
+name = "vslide-render"
+version = "0.1.0"
+dependencies = [
+ "vslide-color",
+ "vslide-fonts",
+ "vslide-geom",
+ "vslide-model",
+ "vslide-text",
+ "image",
+ "kurbo",
+ "log",
+ "vello_common 0.2.0",
+ "vello_cpu 0.2.0",
+]
+
+[[package]]
+name = "vslide-text"
+version = "0.1.0"
+dependencies = [
+ "vslide-color",
+ "vslide-fonts",
+ "vslide-geom",
+ "vslide-model",
+ "unicode-linebreak",
+ "unicode-segmentation",
+]
+
+[[package]]
+name = "vslide-ui-egui"
+version = "0.1.0"
+dependencies = [
+ "vslide-anim",
+ "vslide-color",
+ "vslide-engine",
+ "vslide-fonts",
+ "vslide-geom",
+ "vslide-media",
+ "vslide-model",
+ "vslide-render",
+ "vslide-text",
+ "egui",
+ "egui_kittest",
+ "js-sys",
+ "log",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "vslide-vp9"
+version = "0.1.0"
+dependencies = [
+ "vslide-bitstream",
+ "rayon",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "vslide-web"
+version = "0.1.0"
+dependencies = [
+ "vslide-engine",
+ "vslide-ui-egui",
+ "eframe",
+ "egui",
+ "js-sys",
+ "log",
+ "rfd",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "derive_arbitrary"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3446,302 +3742,6 @@ name = "slab"
 version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
-
-[[package]]
-name = "slidecraft"
-version = "0.1.0"
-dependencies = [
- "arboard",
- "cpal",
- "eframe",
- "egui",
- "image",
- "log",
- "rfd",
- "serde_json",
- "slidecraft-engine",
- "slidecraft-media",
- "slidecraft-ui-egui",
- "winit",
- "winresource",
-]
-
-[[package]]
-name = "slidecraft-anim"
-version = "0.1.0"
-dependencies = [
- "serde",
- "slidecraft-geom",
- "slidecraft-model",
-]
-
-[[package]]
-name = "slidecraft-av1"
-version = "0.1.0"
-dependencies = [
- "rayon",
- "slidecraft-bitstream",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "slidecraft-bitstream"
-version = "0.1.0"
-dependencies = [
- "proptest",
-]
-
-[[package]]
-name = "slidecraft-cli"
-version = "0.1.0"
-dependencies = [
- "serde_json",
- "slidecraft-engine",
- "slidecraft-mcp",
-]
-
-[[package]]
-name = "slidecraft-color"
-version = "0.1.0"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "slidecraft-engine"
-version = "0.1.0"
-dependencies = [
- "i_overlay",
- "image",
- "log",
- "serde",
- "serde_json",
- "slidecraft-color",
- "slidecraft-fonts",
- "slidecraft-format",
- "slidecraft-geom",
- "slidecraft-media",
- "slidecraft-model",
- "slidecraft-pdf",
- "slidecraft-pptx",
- "slidecraft-render",
- "slidecraft-text",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "slidecraft-fonts"
-version = "0.1.0"
-dependencies = [
- "epaint_default_fonts",
- "harfrust 0.13.3",
- "kurbo",
- "log",
- "skrifa 0.47.0",
- "unicode-bidi",
-]
-
-[[package]]
-name = "slidecraft-format"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
- "slidecraft-model",
- "thiserror 2.0.21",
- "zip",
-]
-
-[[package]]
-name = "slidecraft-geom"
-version = "0.1.0"
-dependencies = [
- "kurbo",
- "serde",
-]
-
-[[package]]
-name = "slidecraft-h264"
-version = "0.1.0"
-dependencies = [
- "rayon",
- "slidecraft-bitstream",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "slidecraft-hevc"
-version = "0.1.0"
-dependencies = [
- "rayon",
- "slidecraft-bitstream",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "slidecraft-isobmff"
-version = "0.1.0"
-dependencies = [
- "slidecraft-bitstream",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "slidecraft-matroska"
-version = "0.1.0"
-
-[[package]]
-name = "slidecraft-mcp"
-version = "0.1.0"
-dependencies = [
- "log",
- "serde_json",
- "slidecraft-engine",
- "slidecraft-render",
-]
-
-[[package]]
-name = "slidecraft-media"
-version = "0.1.0"
-dependencies = [
- "image",
- "log",
- "slidecraft-av1",
- "slidecraft-h264",
- "slidecraft-hevc",
- "slidecraft-isobmff",
- "slidecraft-matroska",
- "slidecraft-ogg",
- "slidecraft-opus",
- "slidecraft-vp9",
- "symphonia",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "slidecraft-model"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
- "slidecraft-color",
- "slidecraft-geom",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "slidecraft-ogg"
-version = "0.1.0"
-
-[[package]]
-name = "slidecraft-opus"
-version = "0.1.0"
-
-[[package]]
-name = "slidecraft-pdf"
-version = "0.1.0"
-dependencies = [
- "krilla",
- "kurbo",
- "log",
- "serde",
- "slidecraft-fonts",
- "slidecraft-model",
- "slidecraft-render",
- "slidecraft-text",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "slidecraft-pptx"
-version = "0.1.0"
-dependencies = [
- "image",
- "log",
- "quick-xml 0.38.4",
- "serde_json",
- "slidecraft-color",
- "slidecraft-engine",
- "slidecraft-geom",
- "slidecraft-model",
- "thiserror 2.0.21",
- "zip",
-]
-
-[[package]]
-name = "slidecraft-render"
-version = "0.1.0"
-dependencies = [
- "image",
- "kurbo",
- "log",
- "slidecraft-color",
- "slidecraft-fonts",
- "slidecraft-geom",
- "slidecraft-model",
- "slidecraft-text",
- "vello_common 0.2.0",
- "vello_cpu 0.2.0",
-]
-
-[[package]]
-name = "slidecraft-text"
-version = "0.1.0"
-dependencies = [
- "slidecraft-color",
- "slidecraft-fonts",
- "slidecraft-geom",
- "slidecraft-model",
- "unicode-linebreak",
- "unicode-segmentation",
-]
-
-[[package]]
-name = "slidecraft-ui-egui"
-version = "0.1.0"
-dependencies = [
- "egui",
- "egui_kittest",
- "js-sys",
- "log",
- "serde",
- "serde_json",
- "slidecraft-anim",
- "slidecraft-color",
- "slidecraft-engine",
- "slidecraft-fonts",
- "slidecraft-geom",
- "slidecraft-media",
- "slidecraft-model",
- "slidecraft-render",
- "slidecraft-text",
-]
-
-[[package]]
-name = "slidecraft-vp9"
-version = "0.1.0"
-dependencies = [
- "rayon",
- "slidecraft-bitstream",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "slidecraft-web"
-version = "0.1.0"
-dependencies = [
- "eframe",
- "egui",
- "js-sys",
- "log",
- "rfd",
- "serde_json",
- "slidecraft-engine",
- "slidecraft-ui-egui",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
 
 [[package]]
 name = "slotmap"

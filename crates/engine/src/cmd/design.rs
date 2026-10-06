@@ -3,11 +3,11 @@
 
 use std::sync::Arc;
 
+use vslide_geom::Size;
+use vslide_model::text::{Run, RunKind, TextBody};
+use vslide_model::theme::{builtin_color_schemes, builtin_font_schemes, builtin_themes};
+use vslide_model::{Background, Fill, PhType, Presentation, Shape, ShapeId, defaults};
 use serde_json::{Value, json};
-use slidecraft_geom::Size;
-use slidecraft_model::text::{Run, RunKind, TextBody};
-use slidecraft_model::theme::{builtin_color_schemes, builtin_font_schemes, builtin_themes};
-use slidecraft_model::{Background, Fill, PhType, Presentation, Shape, ShapeId, defaults};
 
 use super::*;
 use crate::{Result, Session, Target};
@@ -114,7 +114,7 @@ fn colors(s: &mut Session, p: &Value) -> Result<Value> {
         }
         if let Some(c) = &custom {
             for (k, v) in c {
-                if let (Some(slot), Some(rgb)) = (slidecraft_color::SchemeSlot::from_xml(k), v.as_str().and_then(slidecraft_color::Rgba::from_hex)) {
+                if let (Some(slot), Some(rgb)) = (vslide_color::SchemeSlot::from_xml(k), v.as_str().and_then(vslide_color::Rgba::from_hex)) {
                     m.theme.colors.set(slot, rgb);
                 }
             }
@@ -134,10 +134,10 @@ fn fonts(s: &mut Session, p: &Value) -> Result<Value> {
     } else {
         let major = str_param(p, "major").ok_or_else(|| bad("design.fonts", "give `name`, or `major` and `minor`"))?;
         let minor = str_param(p, "minor").unwrap_or(major);
-        slidecraft_model::theme::FontScheme {
+        vslide_model::theme::FontScheme {
             name: "Custom".into(),
-            major: slidecraft_model::theme::FontSet { latin: major.into(), ..Default::default() },
-            minor: slidecraft_model::theme::FontSet { latin: minor.into(), ..Default::default() },
+            major: vslide_model::theme::FontSet { latin: major.into(), ..Default::default() },
+            minor: vslide_model::theme::FontSet { latin: minor.into(), ..Default::default() },
         }
     };
     s.edit(|doc, sel| {
@@ -155,16 +155,12 @@ fn background(s: &mut Session, p: &Value) -> Result<Value> {
         Some(Background::Fill { fill: Fill::solid(c) })
     } else if let Some(i) = usize_param(p, "style") {
         // Background styles: 3 theme bg fills × 4 colours (bg1, bg2, tx1, tx2).
-        let slots = [
-            slidecraft_color::SchemeSlot::Bg1,
-            slidecraft_color::SchemeSlot::Bg2,
-            slidecraft_color::SchemeSlot::Tx2,
-            slidecraft_color::SchemeSlot::Tx1,
-        ];
+        let slots =
+            [vslide_color::SchemeSlot::Bg1, vslide_color::SchemeSlot::Bg2, vslide_color::SchemeSlot::Tx2, vslide_color::SchemeSlot::Tx1];
         let i = i.clamp(1, 12) - 1;
         Some(Background::Ref {
             idx: 1001 + (i / 4) as u32,
-            color: slidecraft_model::ColorRef::scheme(slots.get(i % 4).copied().unwrap_or(slidecraft_color::SchemeSlot::Bg1)),
+            color: vslide_model::ColorRef::scheme(slots.get(i % 4).copied().unwrap_or(vslide_color::SchemeSlot::Bg1)),
         })
     } else if let Some(g) = p.get("gradient") {
         let mut g = super::shape::gradient_param(g).ok_or_else(|| bad("design.background", "gradient needs two or more `stops`"))?;
@@ -172,17 +168,17 @@ fn background(s: &mut Session, p: &Value) -> Result<Value> {
         Some(Background::Fill { fill: Fill::Gradient(g) })
     } else if let Some(pt) = p.get("pattern") {
         Some(Background::Fill {
-            fill: Fill::Pattern(slidecraft_model::style::PatternFill {
+            fill: Fill::Pattern(vslide_model::style::PatternFill {
                 preset: pt.get("preset").and_then(Value::as_str).unwrap_or("pct50").to_string(),
-                fg: pt.get("fg").and_then(color_value).unwrap_or(slidecraft_model::ColorRef::scheme(slidecraft_color::SchemeSlot::Accent1)),
-                bg: pt.get("bg").and_then(color_value).unwrap_or(slidecraft_model::ColorRef::scheme(slidecraft_color::SchemeSlot::Bg1)),
+                fg: pt.get("fg").and_then(color_value).unwrap_or(vslide_model::ColorRef::scheme(vslide_color::SchemeSlot::Accent1)),
+                bg: pt.get("bg").and_then(color_value).unwrap_or(vslide_model::ColorRef::scheme(vslide_color::SchemeSlot::Bg1)),
             }),
         })
     } else if p.get("picture").is_some() {
         let (name, bytes) = super::insert::media_bytes(&with_param(p, "data", p.get("picture").cloned().unwrap_or_default()), "design.background")?;
         let ct = super::insert::content_type(&name, &bytes);
         let media = s.edit(|doc, _| Ok(doc.add_media(&name, ct, bytes)))?;
-        Some(Background::Fill { fill: Fill::Picture(slidecraft_model::style::PictureFill { media, ..Default::default() }) })
+        Some(Background::Fill { fill: Fill::Picture(vslide_model::style::PictureFill { media, ..Default::default() }) })
     } else {
         return Err(bad("design.background", "give `color`, `gradient`, `pattern`, `picture`, `style` or `reset`"));
     };
@@ -234,7 +230,7 @@ fn scale_shapes(shapes: &mut [Shape], sx: f64, sy: f64, k: f64, ox: f64, oy: f64
             x.h *= sy;
         }
         if let Some(t) = sh.text.as_mut() {
-            slidecraft_model::edit::format_all(t, &|r| {
+            vslide_model::edit::format_all(t, &|r| {
                 if let Some(sz) = r.size.as_mut() {
                     *sz = (*sz * k).max(1.0);
                 }
@@ -316,7 +312,7 @@ fn header_footer(s: &mut Session, p: &Value) -> Result<Value> {
         for i in list {
             let Some(layout) = doc.slides.get(i).map(|x| x.layout) else { continue };
             let lay = doc.layout(layout).map(|(_, l)| l.clone());
-            let is_title = lay.as_ref().is_some_and(|l| l.kind == slidecraft_model::LayoutType::Title);
+            let is_title = lay.as_ref().is_some_and(|l| l.kind == vslide_model::LayoutType::Title);
             let want = |k: PhType| {
                 !(hf.hide_on_title && is_title)
                     && match k {
@@ -343,7 +339,7 @@ fn header_footer(s: &mut Session, p: &Value) -> Result<Value> {
                         let Some(lp) = lp else { continue };
                         let body = match k {
                             PhType::SlideNum => TextBody {
-                                paragraphs: vec![slidecraft_model::Paragraph {
+                                paragraphs: vec![vslide_model::Paragraph {
                                     runs: vec![Run {
                                         text: "‹#›".into(),
                                         props: Default::default(),
@@ -354,7 +350,7 @@ fn header_footer(s: &mut Session, p: &Value) -> Result<Value> {
                                 ..Default::default()
                             },
                             PhType::Date if hf.date_text.is_empty() => TextBody {
-                                paragraphs: vec![slidecraft_model::Paragraph {
+                                paragraphs: vec![vslide_model::Paragraph {
                                     runs: vec![Run { text: today(), props: Default::default(), kind: RunKind::Field { field: "datetime1".into() } }],
                                     ..Default::default()
                                 }],
@@ -444,7 +440,7 @@ fn insert_layout(s: &mut Session, p: &Value) -> Result<Value> {
     let name = str_param(p, "name").unwrap_or("Custom Layout").to_string();
     s.edit(|doc, sel| {
         let mi = master_index(doc, sel);
-        let id = slidecraft_model::LayoutId(doc.alloc_id());
+        let id = vslide_model::LayoutId(doc.alloc_id());
         let tid = ShapeId(doc.alloc_id());
         let size = doc.slide_size;
         let m = Arc::make_mut(doc.masters.get_mut(mi).ok_or_else(|| bad("master.insertLayout", "no master"))?);
@@ -460,10 +456,10 @@ fn insert_layout(s: &mut Session, p: &Value) -> Result<Value> {
         };
         m.layouts.insert(
             at.min(m.layouts.len()),
-            slidecraft_model::Layout {
+            vslide_model::Layout {
                 id,
                 name,
-                kind: slidecraft_model::LayoutType::Custom,
+                kind: vslide_model::LayoutType::Custom,
                 shapes: title.into_iter().collect(),
                 background: None,
                 show_master_shapes: true,
@@ -528,11 +524,11 @@ fn insert_placeholder(s: &mut Session, p: &Value) -> Result<Value> {
         return Err(bad("master.insertPlaceholder", "select a layout in Slide Master view"));
     }
     let size = s.doc()?.doc.slide_size;
-    let rect = rect_param(p, "rect").unwrap_or(slidecraft_geom::Xfrm::new(size.width * 0.25, size.height * 0.3, size.width * 0.5, size.height * 0.4));
+    let rect = rect_param(p, "rect").unwrap_or(vslide_geom::Xfrm::new(size.width * 0.25, size.height * 0.3, size.width * 0.5, size.height * 0.4));
     let idx = s.doc()?.shapes().iter().filter_map(|x| x.ph.as_ref().map(|p| p.idx)).max().unwrap_or(0) + 1;
     let shape = Shape {
         xfrm: Some(rect),
-        ph: Some(slidecraft_model::Placeholder { kind, idx, ..Default::default() }),
+        ph: Some(vslide_model::Placeholder { kind, idx, ..Default::default() }),
         text: Some(TextBody::default()),
         ..Default::default()
     };

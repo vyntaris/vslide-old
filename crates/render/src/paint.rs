@@ -1,11 +1,11 @@
 //! Fills: solid, gradient, picture and pattern paints.
 
+use vslide_color::Rgba;
+use vslide_geom::preset::FillMode;
+use vslide_model::resolve::Ctx;
+use vslide_model::style::{Fill, GradientShape, PictureFill, PictureMode};
+use vslide_model::{PhType, Presentation};
 use kurbo::{Affine, BezPath, Point, Rect, Shape as _};
-use slidecraft_color::Rgba;
-use slidecraft_geom::preset::FillMode;
-use slidecraft_model::resolve::Ctx;
-use slidecraft_model::style::{Fill, GradientShape, PictureFill, PictureMode};
-use slidecraft_model::{PhType, Presentation};
 use vello_cpu::{RenderContext, peniko};
 
 use crate::{color, images, shade};
