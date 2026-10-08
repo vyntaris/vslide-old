@@ -51,6 +51,7 @@
   <a href="#getting-started">Getting started</a> ·
   <a href="#agents-cli-and-mcp">Agents, CLI and MCP</a> ·
   <a href="#roadmap">Roadmap</a> ·
+  <a href="#downloads">Downloads</a> ·
   <a href="#the-crafting-apps">The Crafting Apps</a> ·
   <a href="#license-and-credits">License</a>
 </p>
@@ -124,6 +125,50 @@ VSlide covers about **79% of PowerPoint's features by breadth** (93% of the core
 roughly **80% of the way to a first alpha**. See [ROADMAP.md](ROADMAP.md) for the alpha checklist,
 parity estimates and what's next, and [docs/parity.md](docs/parity.md) for the feature-by-feature
 scorecard.
+
+## Downloads
+
+Every [release](https://github.com/storytold/deckcraft/releases/latest) ships these builds. `<ver>` is the
+version number; `SHA256SUMS.txt` lists a checksum for every file.
+
+### macOS
+
+| Build | File | Notes |
+|---|---|---|
+| App, universal (Apple silicon + Intel) | `vslide-<ver>-macos-universal.dmg` | Signed and notarized |
+| Command-line tool, universal | `vslide-cli-<ver>-macos-universal.zip` | Signed and notarized |
+
+### Windows
+
+| Build | Installer | Portable |
+|---|---|---|
+| x64 (64-bit Intel/AMD) | `vslide-<ver>-windows-x64.msi` | `vslide-<ver>-windows-x64-portable.zip` |
+| arm64 (Snapdragon and other ARM PCs) | `vslide-<ver>-windows-arm64.msi` | `vslide-<ver>-windows-arm64-portable.zip` |
+| x86 (32-bit) | `vslide-<ver>-windows-x86.msi` | `vslide-<ver>-windows-x86-portable.zip` |
+
+Installers and executables are code-signed.
+
+### Linux
+
+| Format | x86_64 | aarch64 (ARM64) | Notes |
+|---|---|---|---|
+| AppImage | `vslide-<ver>-linux-x86_64.AppImage` | `vslide-<ver>-linux-aarch64.AppImage` | Runs anywhere; updates itself with [AppImageUpdate](https://github.com/AppImageCommunity/AppImageUpdate) (`.zsync` files) |
+| Flatpak | `vslide-<ver>-linux-x86_64.flatpak` | `vslide-<ver>-linux-aarch64.flatpak` | Sandboxed; `flatpak install --user <file>` |
+| Debian/Ubuntu | `vslide-<ver>-linux-x86_64.deb` | `vslide-<ver>-linux-aarch64.deb` | |
+| Fedora/RHEL/openSUSE | `vslide-<ver>-linux-x86_64.rpm` | `vslide-<ver>-linux-aarch64.rpm` | |
+| Tarball | `vslide-<ver>-linux-x86_64.tar.gz` | `vslide-<ver>-linux-aarch64.tar.gz` | Unpack anywhere |
+
+### FreeBSD
+
+| Build | File |
+|---|---|
+| x86_64 | `vslide-<ver>-freebsd-x86_64.tar.gz` |
+
+### Web (WebAssembly)
+
+| Build | File | Notes |
+|---|---|---|
+| Static site | `vslide-web-<ver>.zip` | Runs in a modern browser; host it on any static server |
 
 ## The Crafting Apps
 
