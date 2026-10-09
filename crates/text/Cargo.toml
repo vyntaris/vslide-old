@@ -15,3 +15,4 @@ vslide-color = { workspace = true }
 vslide-fonts = { workspace = true }
 unicode-linebreak = { workspace = true }
 unicode-segmentation = { workspace = true }
+unicode-bidi = { workspace = true }

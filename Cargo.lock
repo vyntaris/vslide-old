@@ -1109,6 +1109,7 @@ dependencies = [
  "vslide-fonts",
  "vslide-geom",
  "vslide-model",
+ "unicode-bidi",
  "unicode-linebreak",
  "unicode-segmentation",
 ]
