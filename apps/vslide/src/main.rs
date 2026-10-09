@@ -14,6 +14,8 @@
 
 mod audio;
 mod control_server;
+#[cfg(any(target_os = "windows", test))]
+mod graphics;
 mod logging;
 
 use vslide_engine::Session;
@@ -188,6 +190,9 @@ fn main() -> eframe::Result {
             b.with_x11();
         }));
     }
+    // Before eframe creates the wgpu instance: default Windows to DirectX 12 only (see graphics.rs).
+    #[cfg(target_os = "windows")]
+    graphics::configure(&mut options, eframe::wgpu::Backends::from_env());
     eframe::run_native(
         "VSlide",
         options,
