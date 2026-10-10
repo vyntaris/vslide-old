@@ -951,6 +951,7 @@ dependencies = [
  "vslide-text",
  "i_overlay",
  "image",
+ "js-sys",
  "log",
  "serde",
  "serde_json",
