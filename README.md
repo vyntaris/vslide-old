@@ -207,6 +207,8 @@ and web backend defaults are unchanged.
 | Fedora/RHEL/openSUSE | `vslide-<ver>-linux-x86_64.rpm` | `vslide-<ver>-linux-aarch64.rpm` | |
 | Tarball | `vslide-<ver>-linux-x86_64.tar.gz` | `vslide-<ver>-linux-aarch64.tar.gz` | Unpack anywhere |
 
+RISC-V 64 (riscv64): `vslide-<ver>-linux-riscv64.tar.gz`, a tarball only (cross-compiled; needs glibc 2.39+, e.g. Ubuntu 24.04+).
+
 ### FreeBSD
 
 | Build | File |
