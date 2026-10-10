@@ -1,0 +1,11 @@
+kind = "app"
+categories = ["Office"]
+icon = "assets/app-icon/hicolor/256x256/apps/ai.storyteller.vslide.png"
+
+[linux.x86_64]
+asset = "vslide-{version}-linux-x86_64.tar.gz"
+exec = "vslide-{version}-linux-x86_64/bin/vslide"
+
+[linux.aarch64]
+asset = "vslide-{version}-linux-aarch64.tar.gz"
+exec = "vslide-{version}-linux-aarch64/bin/vslide"
