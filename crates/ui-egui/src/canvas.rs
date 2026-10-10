@@ -379,14 +379,9 @@ fn overlays(app: &mut SlideApp, ui: &Ui, painter: &egui::Painter, xf: Xf, t: &To
         && let Some(l) = vslide_engine::cmd::text::layout_for(st, ts)
     {
         let x = vslide_engine::cmd::xfrm_of(&st.doc, &st.selection, sh);
-        let a = x.affine();
-        let rot = if l.rotation != 0.0 {
-            let c = l.inner.center().to_vec2();
-            vslide_geom::Affine::translate(c) * vslide_geom::Affine::rotate(l.rotation.to_radians()) * vslide_geom::Affine::translate(-c)
-        } else {
-            vslide_geom::Affine::IDENTITY
-        };
-        let m = a * rot;
+        // Where the text is drawn: flips don't mirror it, vertical text is turned.
+        let tr = vslide_render::shape_geometry(sh, x.w, x.h).text_rect;
+        let m = vslide_render::text_transform(x.affine(), tr, l.rotation);
         let (s0, s1) = ts.ordered();
         for r in l.selection_rects(vslide_text::Pos { para: s0.0, ch: s0.1 }, vslide_text::Pos { para: s1.0, ch: s1.1 }) {
             let pts = [Point::new(r.x0, r.y0), Point::new(r.x1, r.y0), Point::new(r.x1, r.y1), Point::new(r.x0, r.y1)].map(|q| xf.to_screen(m * q));
