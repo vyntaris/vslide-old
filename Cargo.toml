@@ -14,6 +14,7 @@ repository = "https://github.com/storytold/deckcraft"
 # internal
 vslide-geom = { path = "crates/geom" }
 vslide-color = { path = "crates/color" }
+vslide-metafile = { path = "crates/metafile" }
 vslide-model = { path = "crates/model" }
 vslide-fonts = { path = "crates/fonts" }
 vslide-text = { path = "crates/text" }
