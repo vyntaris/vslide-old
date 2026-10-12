@@ -147,7 +147,7 @@ A presentation is edited by running commands on it:
   vslide-cli run --cmd 'slide.new={{\"title\":\"Q3 results\"}}' --save q3.vslide
 
 `vslide-cli help SUBCOMMAND`, or `vslide-cli SUBCOMMAND --help`, explains one subcommand;
-`vslide-cli help run` explains commands.",
+`vslide-cli help run` explains how to write a command.",
         list.join("\n")
     )
 }
