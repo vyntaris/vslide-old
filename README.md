@@ -58,7 +58,7 @@
 
 ## What works today
 
-VSlide is in early development, heading for its first alpha (see the [roadmap](ROADMAP.md)).
+VSlide is in alpha, heading for beta (see the [roadmap](ROADMAP.md)).
 Today it can:
 
 - **Make decks**: slide masters and eleven layouts with placeholders that inherit position and
@@ -154,10 +154,12 @@ vslide-cli mcp --connect 7990        # drive the running app (vslide --control 7
 
 ## Roadmap
 
-VSlide covers about **79% of PowerPoint's features by breadth** (93% of the core ones) and is
-roughly **80% of the way to a first alpha**. See [ROADMAP.md](ROADMAP.md) for the alpha checklist,
-parity estimates and what's next, and [docs/parity.md](docs/parity.md) for the feature-by-feature
-scorecard.
+VSlide is in **alpha**. It covers **79% of PowerPoint's features by breadth** (92% of the core
+ones, measured) and is about **55% of the way to replacing PowerPoint for real work** (estimated).
+See [ROADMAP.md](ROADMAP.md) for the stage, numbers by dimension and what's next,
+[docs/target-app-parity.md](docs/target-app-parity.md) for the full assessment,
+[docs/gaps.md](docs/gaps.md) for every known shortfall and
+[docs/parity-checklist.md](docs/parity-checklist.md) for the feature-by-feature checklist.
 
 ## Downloads
 
@@ -204,6 +206,8 @@ and web backend defaults are unchanged.
 | Debian/Ubuntu | `vslide-<ver>-linux-x86_64.deb` | `vslide-<ver>-linux-aarch64.deb` | |
 | Fedora/RHEL/openSUSE | `vslide-<ver>-linux-x86_64.rpm` | `vslide-<ver>-linux-aarch64.rpm` | |
 | Tarball | `vslide-<ver>-linux-x86_64.tar.gz` | `vslide-<ver>-linux-aarch64.tar.gz` | Unpack anywhere |
+
+RISC-V 64 (riscv64): `vslide-<ver>-linux-riscv64.tar.gz`, a tarball only (cross-compiled; needs glibc 2.39+, e.g. Ubuntu 24.04+).
 
 ### FreeBSD
 
