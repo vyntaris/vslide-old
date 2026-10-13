@@ -74,7 +74,7 @@ the round trip even though VSlide doesn't model it.
 | Tables with styles | yes | yes | |
 | Charts (`c:chartSpace`) | yes | yes | Original XML kept in `Chart.raw` |
 | Charts (`cx:` chartex: waterfall, funnel, treemap, sunburst, histogram, box) | no | no | |
-| SmartArt (`dgm`) | drawing part only, as a group | as shapes | Diagram data model lost on save |
+| SmartArt (`dgm`) | drawing part only, as a group | as shapes | Diagram data model lost on save (VSlide keeps its own outline in `.vslide` only) |
 | Equations (OMML, `a14:m`) | no | no | PR #55 open |
 | Audio / video (`p14:media`, trim, fades, bookmarks) | yes | partly | Playback options lost on save (#74) |
 | Ink (`contentPart`) | yes | as a group of freeform lines | PowerPoint sees shapes, not ink |
