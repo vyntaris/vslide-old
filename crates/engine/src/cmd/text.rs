@@ -177,11 +177,17 @@ pub fn layout_for(st: &DocState, t: &TextSel) -> Option<vslide_text::TextLayout>
 
 /// The insertion point on the slide: its line from top to bottom, in slide coordinates (flips and
 /// vertical text as drawn). Text with no paragraph yet (a placeholder about to be typed in) is
-/// measured as one empty paragraph, so the caret shows where typing begins. `None` for notes and
-/// table cells, which aren't laid out on the slide here.
+/// measured as one empty paragraph, so the caret shows where typing begins. `None` for notes,
+/// which are an egui text field.
 pub fn caret_line(st: &DocState, t: &TextSel) -> Option<(vslide_geom::Point, vslide_geom::Point)> {
-    if t.notes || t.cell.is_some() {
+    if t.notes {
         return None;
+    }
+    if let Some((row, col)) = t.cell {
+        let placed = cell_on_slide(st, t.shape, row, col)?;
+        let aff = if t.at_line_end() { vslide_text::Affinity::Upstream } else { vslide_text::Affinity::Downstream };
+        let (cx, top, bot) = placed.layout.caret_drawn(vslide_text::Pos { para: t.caret.0, ch: t.caret.1 }, aff)?;
+        return Some((placed.to_slide * vslide_geom::Point::new(cx, top), placed.to_slide * vslide_geom::Point::new(cx, bot)));
     }
     let sh = st.shape(t.shape)?;
     let ctx = ctx_for(&st.doc, &st.selection)?;
@@ -483,20 +489,35 @@ fn commit(s: &mut Session, p: &Value) -> Result<Value> {
 }
 
 /// Underlines under an input method's composition (#101), in slide coordinates: `(from, to,
-/// thick)` per line, thick under the part being converted. Empty without a composition or when
-/// the edited text isn't laid out on the slide (notes, table cells).
+/// thick)` per line, thick under the part being converted. Empty without a composition, or for
+/// notes (an egui text field draws its own composition).
 pub fn composition_underlines(st: &DocState) -> Vec<(vslide_geom::Point, vslide_geom::Point, bool)> {
     let (Some(c), Some(t)) = (&st.composition, &st.selection.text) else { return vec![] };
+    if t.notes {
+        return vec![];
+    }
+    if let Some((row, col)) = t.cell {
+        let Some(placed) = cell_on_slide(st, t.shape, row, col) else { return vec![] };
+        return underline_segments(&placed.layout, placed.to_slide, c);
+    }
     let Some(sh) = st.shape(t.shape) else { return vec![] };
     let Some(l) = layout_for(st, t) else { return vec![] };
     let x = xfrm_of(&st.doc, &st.selection, sh);
     let tr = vslide_render::shape_geometry(sh, x.w, x.h).text_rect;
     let m = vslide_render::text_transform(x.affine(), tr, l.rotation);
+    underline_segments(&l, m, c)
+}
+
+fn underline_segments(
+    layout: &vslide_text::TextLayout,
+    to_slide: vslide_geom::Affine,
+    c: &crate::Composition,
+) -> Vec<(vslide_geom::Point, vslide_geom::Point, bool)> {
     let pos = |ch: usize| vslide_text::Pos { para: c.start.0, ch: c.start.1 + ch };
     let mut out = vec![];
     let mut add = |a: usize, b: usize, thick: bool| {
-        for (x0, x1, y) in l.composition_underlines(pos(a), pos(b)) {
-            out.push((m * vslide_geom::Point::new(x0, y), m * vslide_geom::Point::new(x1, y), thick));
+        for (x0, x1, y) in layout.composition_underlines(pos(a), pos(b)) {
+            out.push((to_slide * vslide_geom::Point::new(x0, y), to_slide * vslide_geom::Point::new(x1, y), thick));
         }
     };
     add(0, c.len, false);
@@ -504,6 +525,35 @@ pub fn composition_underlines(st: &DocState) -> Vec<(vslide_geom::Point, vslide_
         add(a, b.min(c.len), true);
     }
     out
+}
+
+/// A table cell's text laid out the way it is drawn, mapped into slide coordinates.
+fn cell_on_slide(st: &DocState, id: ShapeId, row: usize, col: usize) -> Option<CellText> {
+    let sh = st.shape(id)?;
+    let ShapeKind::Table(tb) = &sh.kind else { return None };
+    let cell = tb.cell(row, col)?;
+    let ctx = ctx_for(&st.doc, &st.selection)?;
+    let heights = super::table_drawn_heights(&st.doc, &st.selection, tb);
+    let rect = vslide_render::table_cell_rects(tb, &heights).into_iter().find(|(r, c, _)| *r == row && *c == col)?.2;
+    let mut body = vslide_render::table_cell_body(&ctx, tb, row, col, cell);
+    if body.paragraphs.is_empty() {
+        body.paragraphs.push(vslide_model::text::Paragraph::default());
+    }
+    let tmp = vslide_model::Shape { text: Some(body.clone()), ..Default::default() };
+    let layout = vslide_text::layout(
+        &ctx,
+        &tmp,
+        &body,
+        &vslide_text::Opts { rect, fields: &vslide_text::NoFields, prompt_color: None, no_shrink: false },
+    );
+    let x = xfrm_of(&st.doc, &st.selection, sh);
+    let to_slide = vslide_render::text_transform(x.affine(), rect, layout.rotation);
+    Some(CellText { layout, to_slide })
+}
+
+struct CellText {
+    layout: vslide_text::TextLayout,
+    to_slide: vslide_geom::Affine,
 }
 
 fn insert(s: &mut Session, p: &Value) -> Result<Value> {
