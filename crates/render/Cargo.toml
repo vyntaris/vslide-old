@@ -13,6 +13,7 @@ vslide-geom = { workspace = true }
 vslide-color = { workspace = true }
 vslide-metafile = { workspace = true }
 vslide-model = { workspace = true }
+vslide-anim = { workspace = true }
 vslide-fonts = { workspace = true }
 vslide-text = { workspace = true }
 vello_cpu = { workspace = true }

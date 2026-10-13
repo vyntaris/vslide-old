@@ -1109,6 +1109,7 @@ dependencies = [
 name = "vslide-render"
 version = "0.6.1"
 dependencies = [
+ "vslide-anim",
  "vslide-color",
  "vslide-fonts",
  "vslide-geom",
