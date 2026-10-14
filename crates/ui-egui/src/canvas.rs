@@ -375,14 +375,18 @@ fn master_tex(
     visible: vslide_render::Region,
 ) -> Option<(egui::TextureHandle, vslide_render::Region)> {
     let scale = px.0 as f64 / doc.slide_size.width.max(1.0);
-    let region = vslide_render::pasteboard_region(px, scale, vslide_render::layout_extent(doc, master, layout), visible);
+    let region = crate::textures::fit_texture(
+        vslide_render::pasteboard_region(px, scale, vslide_render::layout_extent(doc, master, layout), visible),
+        visible,
+        crate::textures::max_side(ctx),
+    );
     let img = vslide_render::render_layout(
         doc,
         master,
         layout,
         &vslide_render::RenderOpts { scale, edit: true, offset: region.offset(), size: Some(region.size()), ..Default::default() },
     );
-    Some((ctx.load_texture("master-canvas", crate::textures::to_color_image(&img, false), egui::TextureOptions::LINEAR), region))
+    Some((crate::textures::upload(ctx, "master-canvas", crate::textures::to_color_image(&img, false)), region))
 }
 
 fn ruler(p: &egui::Painter, avail: Rect, slide: Rect, scale: f32, t: &Tokens) {
