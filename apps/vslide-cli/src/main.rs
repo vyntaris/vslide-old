@@ -10,12 +10,15 @@
 //! vslide-cli commands [FILTER]               # list commands (JSON)
 //! vslide-cli describe ID                     # one command
 //! vslide-cli app [--port PORT] COMMAND [JSON] | --method METHOD [JSON]   # drive the running app
-//! vslide-cli mcp [--connect PORT] [--sample] # MCP server over stdio
+//! vslide-cli mcp [--connect PORT] [--sample] [--automation-read-root DIR] [--automation-write-root DIR]
+//!                                               # MCP server over stdio
 //! vslide-cli bench [FILE | --sample] [--runs N] [--json]   # time open, render, save, export
 //! vslide-cli links | --version
 //! ```
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 #![forbid(unsafe_code)]
+
+mod automation_args;
 
 use std::process::ExitCode;
 
@@ -44,7 +47,11 @@ const USAGE: &str = "usage: vslide-cli info FILE
        vslide-cli commands [FILTER]
        vslide-cli describe COMMAND
        vslide-cli app [--port PORT] COMMAND [JSON] | --method METHOD [JSON]
-       vslide-cli mcp [--connect PORT] [--sample]
+       vslide-cli mcp [--connect PORT] [--sample] [--automation-read-root DIR] [--automation-write-root DIR]
+                         the two roots confine every file the agent's commands read (open, pictures,
+                         audio, video) and write (save, export, PDF) to those folders, links followed;
+                         a root left out grants none of its access. They run the in-process server, so
+                         they conflict with --connect (a running app is not confined by them).
        vslide-cli bench [FILE | --sample] [--runs N] [--json]
        vslide-cli links | --version";
 
@@ -522,13 +529,18 @@ fn app(args: &[String]) -> Result<(), String> {
 }
 
 fn mcp(args: &[String]) -> Result<(), String> {
+    use vslide_engine::file_access::{self, AutomationRoots};
     use vslide_mcp::{Backend, Headless, Remote, Server, control_addr};
     let mut connect: Option<String> = None;
     let mut sample = false;
-    let mut it = args.iter();
+    let mut roots_args = automation_args::AutomationArgs::new(None, None);
+    let mut it = args.iter().cloned();
     while let Some(a) = it.next() {
+        if roots_args.consume(&a, &mut it)? {
+            continue;
+        }
         match a.as_str() {
-            "--connect" => connect = Some(it.next().cloned().ok_or("--connect needs a port or host:port")?),
+            "--connect" => connect = Some(it.next().ok_or("--connect needs a port or host:port")?),
             "--sample" => sample = true,
             "--help" | "-h" => {
                 outln!("{USAGE}");
@@ -537,12 +549,26 @@ fn mcp(args: &[String]) -> Result<(), String> {
             other => return Err(format!("unknown mcp option `{other}`")),
         }
     }
+    let roots = AutomationRoots::new(roots_args.read_root.as_deref(), roots_args.write_root.as_deref())?;
+    if roots.is_some() && connect.is_some() {
+        return Err("--automation-read-root and --automation-write-root confine the in-process server; a running app is not confined by them, \
+so drop --connect (or use --connect without the roots)"
+            .into());
+    }
     let backend: Box<dyn Backend> = match connect {
         Some(c) => Box::new(Remote::connect(&control_addr(&c)).map_err(|e| format!("can't reach the app at {c}: {e}"))?),
         None => {
             let mut h = Headless::new();
+            // `--sample` is the operator's own choice, made before the roots come into force.
             if sample {
                 vslide_engine::sample::open_sample(&mut h.session).map_err(|e| e.to_string())?;
+            }
+            if let Some(roots) = roots {
+                // Every thread of this process, not only the server's: nothing reaches past the roots.
+                file_access::confine_process(roots.clone());
+                let show = |root: Option<&std::path::Path>| root.map_or_else(|| "none".to_string(), |r| r.display().to_string());
+                eprintln!("vslide-cli: files confined: read root {}, write root {}", show(roots.read_root()), show(roots.write_root()));
+                h = h.with_automation_roots(Some(roots));
             }
             Box::new(h)
         }
