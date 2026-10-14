@@ -89,7 +89,11 @@ pub fn open_presentation(name: &str, bytes: &[u8]) -> Result<Presentation> {
     if lower.ends_with(".txt") || lower.ends_with(".md") {
         let text = String::from_utf8_lossy(bytes);
         let mut p = defaults::blank_presentation(defaults::WIDE, Default::default(), false);
-        vslide_format::outline_to_slides(&mut p, &text);
+        if lower.ends_with(".md") {
+            vslide_format::markdown_to_slides(&mut p, &text);
+        } else {
+            vslide_format::outline_to_slides(&mut p, &text);
+        }
         if p.slides.is_empty() {
             p = defaults::new_presentation(None);
         }
