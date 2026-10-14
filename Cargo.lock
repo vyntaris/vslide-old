@@ -939,6 +939,7 @@ dependencies = [
 name = "vslide-engine"
 version = "0.7.0"
 dependencies = [
+ "vslide-anim",
  "vslide-color",
  "vslide-fonts",
  "vslide-format",
