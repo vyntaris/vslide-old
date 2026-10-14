@@ -150,6 +150,7 @@ vslide-cli commands format.          # list commands
 vslide-cli run --sample --cmd 'slide.new={"layout":"titleOnly","title":"Hello"}' --save hello.vslide
 vslide-cli mcp                       # MCP server over stdio (headless)
 vslide-cli mcp --connect 7990        # drive the running app (vslide --control 7990)
+vslide-cli mcp --automation-read-root DIR --automation-write-root DIR   # confine the headless agent to folders
 ```
 
 ## Roadmap
