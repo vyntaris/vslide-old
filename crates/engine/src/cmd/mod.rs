@@ -26,6 +26,7 @@ pub mod smartart;
 pub mod table;
 pub mod text;
 pub mod transition;
+pub mod zoom;
 
 use vslide_geom::Xfrm;
 use vslide_model::ShapeId;
@@ -183,6 +184,7 @@ pub fn command_specs() -> &'static [CommandSpec] {
         v.extend(inspect::specs());
         v.extend(media::specs());
         v.extend(artistic::specs());
+        v.extend(zoom::specs());
         v
     })
 }
