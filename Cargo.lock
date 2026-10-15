@@ -941,6 +941,7 @@ dependencies = [
  "vslide-engine",
  "vslide-mcp",
  "serde_json",
+ "zip",
 ]
 
 [[package]]
