@@ -10,6 +10,7 @@ workspace = true
 
 [dependencies]
 vslide-model = { workspace = true }
+vslide-text = { workspace = true }
 vslide-geom = { workspace = true }
 vslide-color = { workspace = true }
 quick-xml = { workspace = true }
