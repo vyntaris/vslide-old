@@ -10,12 +10,12 @@
 <h1 align="center">VSlide</h1>
 
 <p align="center">
-  <b>Presentations and slide shows; an open-source, clean-room reimplementation of Microsoft PowerPoint, rebuilt in pure Rust.</b>
+  <b>Presentations and slide shows; an open-source, modern presentation and slide designer, built in pure Rust.</b>
 </p>
 
 <p align="center">
   Build decks with themes, layouts, shapes, pictures, tables, charts, transitions and animations,
-  open and save PowerPoint files, and present them full screen. Native on macOS, Windows, Linux
+  open and save .pptx presentation files, and present them full screen. Native on macOS, Windows, Linux
   and FreeBSD, and in the browser. Every button is also a command that the CLI and AI agents
   (through MCP) can drive.
 </p>
@@ -74,7 +74,7 @@ Today it can:
   audio and video (MP3, AAC, FLAC, ALAC, Ogg, Opus, WAV, AIFF; H.264, HEVC, VP9, AV1).
 - **Present**: transitions (including Morph), entrance/emphasis/exit and motion-path animations,
   by-paragraph builds, full-screen slide show, presenter view, pen, rehearse timings, media playback.
-- **Exchange files**: open and save PowerPoint `.pptx`, export PDF (slides, notes pages, handouts
+- **Exchange files**: open and save .pptx presentations, export PDF (slides, notes pages, handouts
   with selectable text), PNG/JPEG, an animated GIF of the deck and outlines. Unsaved work is kept by AutoRecover.
 - **Automate**: 200+ commands with undo, all scriptable from the CLI, a JSON control channel and an
   MCP server for AI agents.
@@ -132,7 +132,7 @@ settings directory, beside `ui.json` and `prefs.json` (Linux `~/.config/vslide/l
 `$XDG_CONFIG_HOME/vslide/logs/`; macOS `~/Library/Application Support/VSlide/logs/`; Windows
 `%APPDATA%\VSlide\logs\`). A start from a desktop menu or the Dock has no terminal, so this file
 is what to attach to a bug report: the crash guard's panic report, a failed crash-recovery save,
-PowerPoint parts skipped on import and audio output problems land there. Each launch moves the
+Parts skipped on import and audio output problems land there. Each launch moves the
 previous log to `vslide.1.log` (and that one to `vslide.2.log`), so the log of a run that
 crashed survives the next start. The file stops growing at 16 MiB. `--version` writes no file.
 
@@ -158,8 +158,8 @@ vslide-cli mcp --automation-read-root DIR --automation-write-root DIR   # confin
 
 ## Roadmap
 
-VSlide is in **alpha**. It covers **84% of PowerPoint's features by breadth** (92% of the core
-ones, measured) and is about **55% of the way to replacing PowerPoint for real work** (estimated).
+VSlide is in **alpha**. It covers **84% of standard presentation features by breadth** (92% of the core
+ones, measured) and is about **55% of the way to full professional readiness** (estimated).
 See [ROADMAP.md](ROADMAP.md) for the stage, numbers by dimension and what's next,
 [docs/target-app-parity.md](docs/target-app-parity.md) for the full assessment,
 [docs/gaps.md](docs/gaps.md) for every known shortfall and
@@ -279,14 +279,12 @@ Bundled fonts, icons, images and other assets keep their own open licenses; each
 with its author, source and license in [ATTRIBUTION.md](ATTRIBUTION.md).
 
 VSlide's themes, layouts, shape geometry, icons and sample decks are original work, drawn or
-generated in code; no Microsoft artwork, fonts, themes or templates are used.
+generated in code; no proprietary artwork, fonts, themes or templates are used.
 
 The ArtCraft name, wordmark and logos in [`docs/brand/`](docs/brand/) are trademarks of the
 ArtCraft Team and are not covered by this license. They may be used only unmodified, and only as
 part of this repository and VSlide, under [`docs/brand/LICENSE-brand.txt`](docs/brand/LICENSE-brand.txt).
 Forks and modified versions must remove them.
-
-<sub>Microsoft and PowerPoint are trademarks of the Microsoft group of companies. Adobe, Photoshop, Illustrator, Premiere Pro, Lightroom, Acrobat, After Effects and InDesign are trademarks or registered trademarks of Adobe Inc. in the United States and/or other countries. VSlide is an independent, open-source project and is not affiliated with, sponsored by or endorsed by Microsoft Corporation or Adobe Inc.; these names are used only to describe the workflows it is compatible with.</sub>
 
 <p align="center">
   <a href="https://getartcraft.com/"><img alt="ArtCraft" src="docs/brand/artcraft-mark.svg" width="28"></a><br>
