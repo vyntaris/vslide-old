@@ -2,9 +2,9 @@
 //! that put real text over a raster (PDF text layer, links) and for text extraction.
 
 use vslide_model::resolve::{self, Ctx};
-use vslide_model::text::{Hyperlink, TextBody};
+use vslide_model::text::{Hyperlink, RunKind, TextBody};
 use vslide_model::{Presentation, Shape, ShapeId, ShapeKind};
-use vslide_text::{Opts, TextLayout};
+use vslide_text::{Fields, Opts, TextLayout};
 use kurbo::{Affine, Rect};
 
 use crate::{SlideFields, shape_geometry, table};
@@ -162,7 +162,22 @@ fn place_text(out: &mut Placed, rctx: &Ctx, fields: &SlideFields, owner: ShapeId
         let r = Rect::new(x0, line.top, x1, line.bottom);
         out.links.push(PlacedLink { rect: m.transform_rect_bbox(r), link, shape: owner, text: true });
     }
-    out.texts.push(PlacedText { layout, transform: m, body: body.clone() });
+    // Field runs carry their saved text (`‹#›`); the layout drew their values, so the body that
+    // goes with it (character offsets, text layer) must hold the same values.
+    let mut body = body.clone();
+    for para in &mut body.paragraphs {
+        let src = para.clone();
+        for run in &mut para.runs {
+            if let RunKind::Field { field } = &run.kind {
+                let lang = resolve::run(rctx, s, &src, &run.props).lang;
+                if let Some(v) = fields.field_in(field, lang.as_deref()) {
+                    run.text = v;
+                    run.kind = RunKind::Text;
+                }
+            }
+        }
+    }
+    out.texts.push(PlacedText { layout, transform: m, body });
 }
 
 /// The hyperlink of the model run containing character `at` of paragraph `para`.
