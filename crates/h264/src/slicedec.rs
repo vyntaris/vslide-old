@@ -1496,12 +1496,11 @@ mod tests {
                 if dsf == 256 {
                     assert_eq!((mv0, mv1), (col, [0, 0]), "dsf 256 is the identity scale");
                 }
-                // soundcraft#994: mvL1 is scaled from the unclamped mvL0 with only the results
-                // clipped — deriving it from the clipped mvL0 gave [0, 0] here.
-                if dsf == 512 && col == [i16::MAX, 0] {
-                    assert_eq!((mv0, mv1), ([i16::MAX, 0], [i16::MAX, 0]), "mvL1 keeps mvL0's off-range part");
-                }
             }
         }
+        // soundcraft#994: mvL1 is scaled from the unclamped mvL0 with only the results clipped;
+        // deriving it from the clipped mvL0 gave [0, 0] here.
+        let (mv0, mv1) = SliceDecoder::temporal_direct_mvs(512, [i16::MAX, 0]);
+        assert_eq!((mv0, mv1), ([i16::MAX, 0], [i16::MAX, 0]), "mvL1 keeps mvL0's off-range part");
     }
 }
