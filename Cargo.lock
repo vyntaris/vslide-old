@@ -885,7 +885,7 @@ checksum = "0c87e182de0887fd5361989c677c4e8f5000cd9491d6d563161a8f3a5519fc7f"
 
 [[package]]
 name = "vslide"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "arboard",
  "chrono",
@@ -906,7 +906,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-anim"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-geom",
  "vslide-model",
@@ -915,7 +915,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-av1"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-bitstream",
  "rayon",
@@ -924,14 +924,14 @@ dependencies = [
 
 [[package]]
 name = "vslide-bitstream"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "craft-media",
 ]
 
 [[package]]
 name = "vslide-cli"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-engine",
  "vslide-mcp",
@@ -941,14 +941,14 @@ dependencies = [
 
 [[package]]
 name = "vslide-color"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "vslide-engine"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "chrono",
  "vslide-anim",
@@ -974,7 +974,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-fonts"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "epaint_default_fonts",
  "harfrust 0.13.3",
@@ -986,7 +986,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-format"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-model",
  "serde",
@@ -997,7 +997,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-geom"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "kurbo",
  "serde",
@@ -1005,7 +1005,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-h264"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-bitstream",
  "rayon",
@@ -1014,7 +1014,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-hevc"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-bitstream",
  "rayon",
@@ -1023,21 +1023,21 @@ dependencies = [
 
 [[package]]
 name = "vslide-isobmff"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "craft-media",
 ]
 
 [[package]]
 name = "vslide-matroska"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "craft-media",
 ]
 
 [[package]]
 name = "vslide-mcp"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-engine",
  "vslide-render",
@@ -1047,7 +1047,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-media"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-av1",
  "vslide-h264",
@@ -1065,7 +1065,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-metafile"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "image",
  "kurbo",
@@ -1074,7 +1074,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-model"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-color",
  "vslide-geom",
@@ -1086,15 +1086,15 @@ dependencies = [
 
 [[package]]
 name = "vslide-ogg"
-version = "0.10.0"
+version = "0.11.0"
 
 [[package]]
 name = "vslide-opus"
-version = "0.10.0"
+version = "0.11.0"
 
 [[package]]
 name = "vslide-pdf"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "craft-pdf",
  "vslide-fonts",
@@ -1112,7 +1112,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-pptx"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-color",
  "vslide-engine",
@@ -1128,7 +1128,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-render"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-anim",
  "vslide-color",
@@ -1147,7 +1147,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-text"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "chrono",
  "vslide-color",
@@ -1161,7 +1161,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-ui-egui"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-anim",
  "vslide-color",
@@ -1183,7 +1183,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-vp9"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-bitstream",
  "rayon",
@@ -1192,7 +1192,7 @@ dependencies = [
 
 [[package]]
 name = "vslide-web"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "vslide-engine",
  "vslide-ui-egui",
@@ -5619,7 +5619,7 @@ checksum = "9440ea3e5aeabb0ac63af70daf835274065238cdd0cec83418f417eae38bacee"
 
 [[package]]
 name = "xtask"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "serde_json",
 ]
