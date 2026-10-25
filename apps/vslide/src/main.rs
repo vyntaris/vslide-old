@@ -187,6 +187,13 @@ fn main() -> eframe::Result {
     // First, so every start-up record (and the engine's panic hook, installed with the first
     // Session) is captured; see `logging`.
     let logger = logging::install();
+    if let Some(done) = craft_update::self_update::finish(&craft_update::suite::VSLIDE, &std::env::args_os().skip(1).collect::<Vec<_>>()) {
+        if let Err(e) = done {
+            eprintln!("VSlide update helper failed: {e}");
+            std::process::exit(1);
+        }
+        return Ok(());
+    }
     let (control_port, files, sample, show) =
         match startup(std::env::var("VSLIDE_CONTROL_PORT").ok().and_then(|p| p.parse().ok()), std::env::args().skip(1)) {
             Startup::Help => {
@@ -261,6 +268,7 @@ fn main() -> eframe::Result {
             vslide_ui_egui::install_ime_pass_hooks(&cc.egui_ctx);
             let mut app = SlideApp::new(Session::new(), services());
             load_prefs(&mut app);
+            app.enable_update_checks();
             // AutoRecover: reopen what a previous run left unsaved, then keep it current.
             if std::env::var_os("VSLIDE_NO_RECOVERY").is_none() {
                 app.session.recovery_dir = vslide_engine::recovery::default_dir();
