@@ -6,7 +6,7 @@ use vslide_model::text::RunKind;
 use vslide_model::{Paragraph, Shape, ShapeKind, Slide, TextBody};
 use serde_json::{Value, json};
 
-use super::*;
+use super::{CommandSpec, bad, bool_or, cmd, has_doc, str_param};
 use crate::{Result, Session};
 
 pub fn specs() -> Vec<CommandSpec> {

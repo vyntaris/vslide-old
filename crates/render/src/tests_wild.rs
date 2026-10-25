@@ -1,10 +1,14 @@
 //! Render tests for shape, line, fill and effect cases checked against PowerPoint's own exports
 //! of synthetic "wild" slides (observed black-box; see `plan/powerpoint/tools/gen_wild.py`).
 
-use super::*;
+use super::{
+    BezPath, Fill, Image, Line, MAX_DASHES, PathEl, Point, Rect, RenderOpts, ShapeKind, dash_with_caps, head_size, images, limit_dash_count, paint,
+    render_slide, trim_ends,
+};
 use vslide_color::Rgba;
 use vslide_model::style::ColorRef;
 use vslide_model::{CustomPath, Geom, Presentation, Shape, ShapeId, Xfrm};
+use kurbo::Shape as _;
 
 fn deck_with(shapes: Vec<Shape>) -> Presentation {
     let mut p = Presentation::default();
