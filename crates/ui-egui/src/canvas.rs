@@ -1610,6 +1610,7 @@ fn resize_cursor(session: &vslide_engine::Session, id: vslide_model::ShapeId, ha
     }
 }
 
+pub(super) mod preview;
 #[cfg(test)]
 mod tests;
 
