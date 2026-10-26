@@ -1611,6 +1611,7 @@ fn resize_cursor(session: &vslide_engine::Session, id: vslide_model::ShapeId, ha
 }
 
 pub(super) mod preview;
+pub mod squiggles;
 #[cfg(test)]
 mod tests;
 
