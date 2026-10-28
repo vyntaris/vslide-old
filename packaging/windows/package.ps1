@@ -83,6 +83,15 @@ foreach ($check in @(@('vslide.exe', 2), @('vslide-cli.exe', 3))) {
   if ($h.Subsystem -ne $check[1]) { throw "$($check[0]) has PE subsystem $($h.Subsystem), expected $($check[1])" }
   Write-Output "ok $($check[0]): $Arch, PE subsystem $($h.Subsystem)"
 }
+
+# The Start menu shortcut is not advertised and names no MSI icon, so it shows the icon embedded in
+# vslide.exe (#1114). -SkipBuild takes whatever binary is already there, which may come from a
+# build without VSLIDE_REQUIRE_WINRES=1 whose resource compilation failed: refuse an exe with no
+# icon instead of shipping shortcuts with a generic one. ExtractIconEx with index -1 counts them.
+Add-Type -Namespace VSlide -Name Shell -MemberDefinition '[DllImport("shell32.dll", CharSet = CharSet.Unicode)] public static extern uint ExtractIconEx(string file, int index, IntPtr[] large, IntPtr[] small, uint icons);'
+$Icons = [VSlide.Shell]::ExtractIconEx((Join-Path $Bin 'vslide.exe'), -1, $null, $null, 0)
+if ($Icons -eq 0) { throw 'vslide.exe has no embedded icon: rebuild it with VSLIDE_REQUIRE_WINRES=1 (omit -SkipBuild)' }
+Write-Output "ok vslide.exe: $Icons embedded icon group(s)"
 $Stage = Join-Path $TargetDir "windows-package\$Arch"
 Remove-Item -Recurse -Force $Stage -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $Stage | Out-Null
@@ -107,12 +116,15 @@ if ($env:CRAFT_FONTS_DIR) {
 
 # ---- MSI ---------------------------------------------------------------------------------------
 $Msi = Join-Path $Dist "vslide-$Version-windows-$Arch.msi"
+Invoke-Native 'WiX UI extension' { wix extension add -g WixToolset.UI.wixext/5.0.2 }
 Invoke-Native 'wix build' {
-  wix build (Join-Path $PSScriptRoot 'vslide.wxs') -arch $Arch `
+  wix build (Join-Path $PSScriptRoot 'vslide.wxs') -arch $Arch -ext WixToolset.UI.wixext `
     -d "Version=$MsiVersion" -d "BinDir=$Stage" -d "IconPath=$(Join-Path $Root 'assets\app-icon\vslide.ico')" `
     -d "DocsDir=$Docs" -d "HasCraftFontLicences=$HasCraftFontLicences" `
     -o $Msi
 }
+# Check the compiled scope, path and registration contract before signing.
+& (Join-Path $PSScriptRoot 'check-install-policy.ps1') -MsiPath $Msi
 # wix writes its debug symbols (.wixpdb) next to the MSI; keep them out of the release assets.
 Remove-Item -Force -ErrorAction SilentlyContinue ([IO.Path]::ChangeExtension($Msi, '.wixpdb'))
 & (Join-Path $PSScriptRoot 'sign.ps1') $Msi
