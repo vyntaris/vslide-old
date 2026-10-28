@@ -14,7 +14,7 @@ set -euo pipefail
 LINUX="$ROOT/packaging/linux"
 APP_ID=ai.storyteller.vslide
 
-if [ "${1:-}" != "--skip-build" ]; then
+if [[ "${1:-}" != "--skip-build" ]]; then
   (cd "$ROOT" && cargo build --release --locked -p vslide -p vslide-cli)
 fi
 
@@ -22,6 +22,7 @@ ARCH="$(uname -m)"
 case "$ARCH" in
   amd64) ARCH=x86_64 ;;
   arm64) ARCH=aarch64 ;;
+  *) ;;
 esac
 BIN="$CARGO_TARGET_DIR/release"
 NAME="vslide-$VERSION-freebsd-$ARCH"

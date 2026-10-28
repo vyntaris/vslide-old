@@ -1,6 +1,9 @@
-use super::*;
+use std::io::{Cursor, Write};
+use std::sync::Arc;
+
+use super::{Budget, Presentation, load, load_checked, load_within, read_entry, read_entry_max, save};
 use vslide_model::chart::{Chart, ChartPart, ChartRel, ChartType};
-use vslide_model::{Master, Shape, ShapeId};
+use vslide_model::{Master, Shape, ShapeId, ShapeKind};
 use serde_json::{Value, json};
 
 const PART: &str = "ppt/embeddings/owned.xlsx";

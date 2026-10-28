@@ -47,6 +47,7 @@ modules:
     build-commands:
       - cargo --offline build --release --locked -p vslide
       - install -Dm755 target/release/vslide /app/bin/vslide
+      - install -Dm644 NOTICE /app/share/doc/vslide/NOTICE
       - install -Dm644 packaging/linux/ai.storyteller.vslide.desktop /app/share/applications/ai.storyteller.vslide.desktop
       - install -Dm644 packaging/linux/ai.storyteller.vslide.mime.xml /app/share/mime/packages/ai.storyteller.vslide.xml
       - mkdir -p /app/share/icons && cp -R assets/app-icon/hicolor /app/share/icons/
