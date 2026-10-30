@@ -302,9 +302,10 @@ impl Session {
             Some(Hit::TableColumn { id, col }) => self.begin_table_border(id, true, col, p)?,
             Some(Hit::TableRow { id, row }) => self.begin_table_border(id, false, row, p)?,
             Some(Hit::Resize { id, handle }) => {
-                let orig = st.shape(id).map(|s| xfrm_of(&st.doc, &st.selection, s)).unwrap_or_default();
+                let ids: Vec<ShapeId> = if st.selection.shapes.contains(&id) { st.selection.shapes.clone() } else { vec![id] };
+                let origs: Vec<(ShapeId, Xfrm)> = ids.iter().filter_map(|i| st.shape(*i).map(|s| (*i, xfrm_of(&st.doc, &st.selection, s)))).collect();
                 self.begin("Size");
-                self.tool.drag = Some(Drag::Resize { id, handle, orig, start: p });
+                self.tool.drag = Some(Drag::Resize { ids, handle, origs, start: p });
             }
             Some(Hit::LineEnd { id, end }) => {
                 let orig = st.shape(id).map(|s| xfrm_of(&st.doc, &st.selection, s)).unwrap_or_default();
@@ -559,10 +560,12 @@ impl Session {
                     out = self.add_ink(points)?;
                 }
             }
-            Some(Drag::Resize { id, .. }) => {
+            Some(Drag::Resize { ids, .. }) => {
                 self.commit();
-                let _ = cmd::text::fit_text_box(self, id);
-                self.refit_after_resize(id)?;
+                for id in ids {
+                    let _ = cmd::text::fit_text_box(self, id);
+                    self.refit_after_resize(id)?;
+                }
             }
             Some(Drag::TextSelect { before, .. }) => {
                 out = self.paint_if_selection_changed(before, out)?;

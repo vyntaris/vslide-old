@@ -26,10 +26,14 @@ impl Session {
             Drag::Move { ids, start, origs, moved, duplicate, enter_text } => {
                 return self.drag_move(MoveDrag { ids, start, origs, moved, duplicate, enter_text }, p, mods, tol);
             }
-            Drag::Resize { id, handle, orig, start } => {
-                let nx = resize_box(&orig, handle, p - start, mods.shift || self.is_picture(id), mods.alt);
-                let nx = self.snap_resize(nx, &orig, handle, id, tol);
-                self.set_xfrm(id, nx)?;
+            Drag::Resize { ids, handle, origs, start } => {
+                if ids.len() >= 1 {
+                    for (id, o) in &origs {
+                        let nx = resize_box(&o, handle, p - start, mods.shift || self.is_picture(*id), mods.alt);
+                        let nx = self.snap_resize(nx, &o, handle, *id, tol);
+                        self.set_xfrm(*id, nx)?;
+                    }
+                }
             }
             Drag::LineEnd { id, end, orig } => {
                 let a = orig.affine();
