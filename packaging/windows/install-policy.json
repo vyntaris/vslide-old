@@ -1,0 +1,81 @@
+{
+  "id": "vslide",
+  "name": "VSlide",
+  "upgradeCode": "6F9C69E7-7825-40D2-BF26-C274DA676425",
+  "sources": [
+    "vslide.wxs"
+  ],
+  "icon": "assets/app-icon/vslide.ico",
+  "localization": [],
+  "extensions": [
+    "UI"
+  ],
+  "payloads": [
+    "NOTICE",
+    "vslide-cli.exe",
+    "vslide.exe"
+  ],
+  "registry": [
+    [
+      "-1",
+      "Software\\Classes\\Applications\\vslide.exe",
+      "FriendlyAppName",
+      "VSlide"
+    ],
+    [
+      "-1",
+      "Software\\Classes\\Applications\\vslide.exe\\shell\\open\\command",
+      "",
+      "\"[#VslideExe]\" \"%1\""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\Applications\\vslide.exe\\SupportedTypes",
+      ".vslide",
+      ""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\Applications\\vslide.exe\\SupportedTypes",
+      ".pptx",
+      ""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\Applications\\vslide.exe\\SupportedTypes",
+      ".potx",
+      ""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\Applications\\vslide.exe\\SupportedTypes",
+      ".ppsx",
+      ""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\.pptx\\OpenWithProgids",
+      "VSlide.Presentation",
+      ""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\.potx\\OpenWithProgids",
+      "VSlide.Presentation",
+      ""
+    ],
+    [
+      "-1",
+      "Software\\Classes\\.ppsx\\OpenWithProgids",
+      "VSlide.Presentation",
+      ""
+    ],
+    [
+      "-1",
+      "Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\vslide.exe",
+      "",
+      "[#VslideExe]"
+    ]
+  ],
+  "mode": "dualScope"
+}
