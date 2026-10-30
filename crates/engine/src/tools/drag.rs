@@ -26,11 +26,34 @@ impl Session {
             Drag::Move { ids, start, origs, moved, duplicate, enter_text } => {
                 return self.drag_move(MoveDrag { ids, start, origs, moved, duplicate, enter_text }, p, mods, tol);
             }
-            Drag::Resize { ids, handle, origs, start } => {
-                for (id, o) in &origs {
-                    let nx = resize_box(o, handle, p - start, mods.shift || self.is_picture(*id), mods.alt);
-                    let nx = self.snap_resize(nx, handle, &ids, tol);
-                    self.set_xfrm(*id, nx)?;
+            Drag::Resize { id, orig, ids, handle, origs, start } => {
+                let nx = resize_box(&orig, handle, p - start, mods.shift || self.is_picture(id), mods.alt);
+                let nx = self.snap_resize(nx, handle, &ids, tol);
+                let sx = if orig.w > 1e-9 { (nx.w / orig.w) * if nx.flip_h != orig.flip_h { -1.0 } else { 1.0 } - 1.0 } else { 0.0 };
+                let sy = if orig.h > 1e-9 { (nx.h / orig.h) * if nx.flip_v != orig.flip_v { -1.0 } else { 1.0 } - 1.0 } else { 0.0 };
+                let div = if mods.alt { 2.0 } else { 1.0 };
+                let hx = match handle {
+                    0 | 6 | 7 => -1.0,
+                    2..=4 => 1.0,
+                    _ => 0.0,
+                };
+                let hy = match handle {
+                    0..=2 => -1.0,
+                    4..=6 => 1.0,
+                    _ => 0.0,
+                };
+                for (tid, o) in &origs {
+                    let target_nx = if *tid == id {
+                        nx
+                    } else {
+                        let lp = Affine::rotate(o.rot.to_radians())
+                            * Point::new(
+                                hx * sx * o.w / div * if o.flip_h { -1.0 } else { 1.0 },
+                                hy * sy * o.h / div * if o.flip_v { -1.0 } else { 1.0 },
+                            );
+                        resize_box(o, handle, Vec2::new(lp.x, lp.y), mods.shift || self.is_picture(*tid), mods.alt)
+                    };
+                    self.set_xfrm(*tid, target_nx)?;
                 }
             }
             Drag::LineEnd { id, end, orig } => {

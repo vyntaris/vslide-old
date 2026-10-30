@@ -302,12 +302,13 @@ impl Session {
             Some(Hit::TableColumn { id, col }) => self.begin_table_border(id, true, col, p)?,
             Some(Hit::TableRow { id, row }) => self.begin_table_border(id, false, row, p)?,
             Some(Hit::Resize { id, handle }) => {
+                let orig = st.shape(id).map(|s| xfrm_of(&st.doc, &st.selection, s)).unwrap_or_default();
                 let ids: Vec<ShapeId> = if st.selection.shapes.contains(&id) { st.selection.shapes.clone() } else { vec![id] };
                 let origs: Vec<(ShapeId, Xfrm)> =
                     ids.iter().filter_map(|i| st.shape(*i).filter(|s| !s.locked).map(|s| (*i, xfrm_of(&st.doc, &st.selection, s)))).collect();
                 let ids: Vec<ShapeId> = origs.iter().map(|(id, _)| *id).collect();
                 self.begin("Size");
-                self.tool.drag = Some(Drag::Resize { ids, handle, origs, start: p });
+                self.tool.drag = Some(Drag::Resize { id, orig, ids, handle, origs, start: p });
             }
             Some(Hit::LineEnd { id, end }) => {
                 let orig = st.shape(id).map(|s| xfrm_of(&st.doc, &st.selection, s)).unwrap_or_default();

@@ -5504,6 +5504,7 @@ fn pending_resize_autofit(s: &mut Session, ids: &[u64]) {
     .unwrap();
 }
 
+/// Resizing multiple selected shapes scales them proportionally around their anchors in one undo step.
 #[test]
 fn resizing_selected_shapes_is_one_undo_step() {
     let (mut s, [a, b]) = resize_selection_scene();
@@ -5512,7 +5513,7 @@ fn resizing_selected_shapes_is_one_undo_step() {
     let down = drag_gesture(&mut s, (200.0, 180.0), (250.0, 210.0));
     assert_eq!(down["hit"]["kind"], "resize");
     assert_eq!(down["hit"]["id"], a);
-    for (id, expected) in [(a, [100.0, 100.0, 150.0, 110.0]), (b, [120.0, 300.0, 130.0, 130.0])] {
+    for (id, expected) in [(a, [100.0, 100.0, 150.0, 110.0]), (b, [120.0, 300.0, 120.0, 137.5])] {
         let actual = box_of(&mut s, id);
         for (key, value) in ["x", "y", "w", "h"].into_iter().zip(expected) {
             assert_eq!(actual[key], value, "{id}: {key}");
@@ -5526,6 +5527,7 @@ fn resizing_selected_shapes_is_one_undo_step() {
     assert_eq!(s.doc().unwrap().doc, after, "one redo resizes both shapes again");
 }
 
+/// Resizing selected shapes refits their text boxes inside the same undo transaction.
 #[test]
 fn resizing_selected_shapes_refits_text_in_the_same_undo_step() {
     let (mut s, ids) = resize_selection_scene();
@@ -5545,6 +5547,7 @@ fn resizing_selected_shapes_refits_text_in_the_same_undo_step() {
     assert_eq!(s.doc().unwrap().doc, after, "redo includes the final text fit");
 }
 
+/// Clicking a resize handle without dragging neither modifies shapes nor triggers text autofit.
 #[test]
 fn clicking_a_resize_handle_does_not_change_or_refit_selected_shapes() {
     let (mut s, ids) = resize_selection_scene();
@@ -5566,6 +5569,7 @@ fn clicking_a_resize_handle_does_not_change_or_refit_selected_shapes() {
     assert_ne!(s.doc().unwrap().doc, before);
 }
 
+/// Locked shapes in a multi-selection are excluded from both resizing and post-resize text fitting.
 #[test]
 fn resizing_selected_shapes_skips_locked_shapes_and_their_text_fit() {
     let (mut s, [a, b]) = resize_selection_scene();
@@ -5584,6 +5588,7 @@ fn resizing_selected_shapes_skips_locked_shapes_and_their_text_fit() {
     assert_eq!(s.doc().unwrap().doc, before);
 }
 
+/// Resizing selected shapes excludes other selected resize targets from smart-guide snapping.
 #[test]
 fn resizing_selected_shapes_does_not_snap_to_other_resize_targets() {
     for reverse in [false, true] {
@@ -5594,10 +5599,11 @@ fn resizing_selected_shapes_does_not_snap_to_other_resize_targets() {
         // Within snap tolerance of the other selected shape's original right edge.
         drag_gesture(&mut s, (200.0, 140.0), (203.0, 140.0));
         assert_eq!(box_of(&mut s, a)["w"], 103.0, "first shape must not snap back");
-        assert_eq!(box_of(&mut s, b)["w"], 83.0, "selection order must not affect snapping");
+        assert_eq!(box_of(&mut s, b)["w"], 82.4, "selection order must not affect snapping");
     }
 }
 
+/// Resizing selected shapes snaps the active shape against unselected stationary shapes and scales others proportionally.
 #[test]
 fn resizing_selected_shapes_still_snaps_to_stationary_shapes() {
     let (mut s, [a, b]) = resize_selection_scene();
@@ -5607,7 +5613,7 @@ fn resizing_selected_shapes_still_snaps_to_stationary_shapes() {
     s.prefs.smart_guides = true;
     drag_gesture(&mut s, (200.0, 140.0), (203.0, 140.0));
     assert_eq!(box_of(&mut s, a)["w"], 107.0);
-    assert_eq!(box_of(&mut s, b)["w"], 87.0);
+    assert!((box_of(&mut s, b)["w"].as_f64().unwrap() - 85.6).abs() < 1e-9);
     assert_eq!(box_of(&mut s, fixed), fixed_before);
 }
 

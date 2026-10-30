@@ -149,6 +149,8 @@ enum Drag {
         enter_text: Option<(ShapeId, Point)>,
     },
     Resize {
+        id: ShapeId,
+        orig: Xfrm,
         ids: Vec<ShapeId>,
         handle: u8,
         origs: Vec<(ShapeId, Xfrm)>,
