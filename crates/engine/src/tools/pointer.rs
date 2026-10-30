@@ -303,7 +303,8 @@ impl Session {
             Some(Hit::TableRow { id, row }) => self.begin_table_border(id, false, row, p)?,
             Some(Hit::Resize { id, handle }) => {
                 let ids: Vec<ShapeId> = if st.selection.shapes.contains(&id) { st.selection.shapes.clone() } else { vec![id] };
-                let origs: Vec<(ShapeId, Xfrm)> = ids.iter().filter_map(|i| st.shape(*i).map(|s| (*i, xfrm_of(&st.doc, &st.selection, s)))).collect();
+                let origs: Vec<(ShapeId, Xfrm)> = ids.iter().filter_map(|i| {st.shape(*i).filter(|s| !s.locked).map(|s| (*i, xfrm_of(&st.doc, &st.selection, s)))}).collect();
+                let ids: Vec<ShapeId> = origs.iter().map(|(id, _)| *id).collect();
                 self.begin("Size");
                 self.tool.drag = Some(Drag::Resize { ids, handle, origs, start: p });
             }
@@ -560,12 +561,24 @@ impl Session {
                     out = self.add_ink(points)?;
                 }
             }
-            Some(Drag::Resize { ids, .. }) => {
-                self.commit();
-                for id in ids {
-                    let _ = cmd::text::fit_text_box(self, id);
-                    self.refit_after_resize(id)?;
+            Some(Drag::Resize { origs, .. }) => {
+                let changed: Vec<ShapeId> = origs.iter()
+                    .filter_map(|(id, orig)| {
+                        let current = self.active()
+                            .and_then(|st| st.shape(*id).map(|s| {
+                                xfrm_of(&st.doc, &st.selection, s)
+                            }))?;
+
+                        (current != *orig).then_some(*id)
+                    })
+                    .collect();
+                if !changed.is_empty() {
+                    for id in changed {
+                        let _ = cmd::text::fit_text_box(self, id);
+                        self.refit_after_resize(id)?;
+                    }
                 }
+                self.commit();
             }
             Some(Drag::TextSelect { before, .. }) => {
                 out = self.paint_if_selection_changed(before, out)?;
