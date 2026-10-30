@@ -5479,6 +5479,138 @@ fn box_of(s: &mut Session, id: u64) -> serde_json::Value {
     s.execute("shape.inspect", &json!({"id": id})).unwrap()["box"].clone()
 }
 
+/// Two selected boxes with different sizes and aligned right edges, on a blank slide.
+fn resize_selection_scene() -> (Session, [u64; 2]) {
+    let mut s = session();
+    s.execute("slide.new", &json!({"layout": "blank"})).unwrap();
+    s.prefs.smart_guides = false;
+    s.prefs.snap_to_grid = false;
+    let ids = [[100, 100, 100, 80], [120, 300, 80, 100]]
+        .map(|rect| s.execute("shape.insert", &json!({"preset": "rect", "rect": rect, "text": "Resize test"})).unwrap()["id"].as_u64().unwrap());
+    s.execute("edit.select", &json!({"ids": ids})).unwrap();
+    (s, ids)
+}
+
+/// Simulate file-loaded shapes whose stored boxes have not yet been fitted to their text.
+fn pending_resize_autofit(s: &mut Session, ids: &[u64]) {
+    s.edit(|doc, sel| {
+        let shapes = crate::shapes_mut(doc, sel).unwrap();
+        for id in ids {
+            let sh = vslide_model::find_shape_mut(shapes, ShapeId(*id as u32)).unwrap();
+            sh.text.as_mut().unwrap().body.autofit = Some(vslide_model::text::AutoFit::Shape);
+        }
+        Ok(())
+    })
+    .unwrap();
+}
+
+#[test]
+fn resizing_selected_shapes_is_one_undo_step() {
+    let (mut s, [a, b]) = resize_selection_scene();
+    let before = s.doc().unwrap().doc.clone();
+    let steps = s.doc().unwrap().history.undo.len();
+    let down = drag_gesture(&mut s, (200.0, 180.0), (250.0, 210.0));
+    assert_eq!(down["hit"]["kind"], "resize");
+    assert_eq!(down["hit"]["id"], a);
+    for (id, expected) in [(a, [100.0, 100.0, 150.0, 110.0]), (b, [120.0, 300.0, 130.0, 130.0])] {
+        let actual = box_of(&mut s, id);
+        for (key, value) in ["x", "y", "w", "h"].into_iter().zip(expected) {
+            assert_eq!(actual[key], value, "{id}: {key}");
+        }
+    }
+    assert_eq!(s.doc().unwrap().history.undo.len(), steps + 1);
+    let after = s.doc().unwrap().doc.clone();
+    s.execute("edit.undo", &json!({})).unwrap();
+    assert_eq!(s.doc().unwrap().doc, before, "one undo restores both shapes");
+    s.execute("edit.redo", &json!({})).unwrap();
+    assert_eq!(s.doc().unwrap().doc, after, "one redo resizes both shapes again");
+}
+
+#[test]
+fn resizing_selected_shapes_refits_text_in_the_same_undo_step() {
+    let (mut s, ids) = resize_selection_scene();
+    pending_resize_autofit(&mut s, &ids);
+    let before = s.doc().unwrap().doc.clone();
+    let steps = s.doc().unwrap().history.undo.len();
+    // An east-handle drag changes width only; a height change must come from text fitting.
+    drag_gesture(&mut s, (200.0, 140.0), (250.0, 140.0));
+    for (id, old_height) in ids.into_iter().zip([80.0, 100.0]) {
+        assert_ne!(box_of(&mut s, id)["h"], old_height, "both shapes' text is refitted");
+    }
+    assert_eq!(s.doc().unwrap().history.undo.len(), steps + 1);
+    let after = s.doc().unwrap().doc.clone();
+    s.execute("edit.undo", &json!({})).unwrap();
+    assert_eq!(s.doc().unwrap().doc, before);
+    s.execute("edit.redo", &json!({})).unwrap();
+    assert_eq!(s.doc().unwrap().doc, after, "redo includes the final text fit");
+}
+
+#[test]
+fn clicking_a_resize_handle_does_not_change_or_refit_selected_shapes() {
+    let (mut s, ids) = resize_selection_scene();
+    pending_resize_autofit(&mut s, &ids);
+    let before = s.doc().unwrap().doc.clone();
+    let steps = s.doc().unwrap().history.undo.len();
+    let revision = s.doc().unwrap().revision;
+    for kind in [PointerKind::Down, PointerKind::Up] {
+        s.pointer(PointerEvent { kind, x: 200.0, y: 180.0, tol: 3.0, ..Default::default() }).unwrap();
+    }
+    assert_eq!(s.doc().unwrap().doc, before);
+    assert_eq!(s.doc().unwrap().history.undo.len(), steps, "a click creates no undo entry");
+    assert_eq!(s.doc().unwrap().revision, revision);
+    assert!(std::sync::Arc::ptr_eq(&s.doc().unwrap().doc, &before), "a click does not dirty the document");
+    // Ensure this fixture would catch an accidental refit on release.
+    for id in ids {
+        cmd::text::fit_text_box(&mut s, ShapeId(id as u32)).unwrap();
+    }
+    assert_ne!(s.doc().unwrap().doc, before);
+}
+
+#[test]
+fn resizing_selected_shapes_skips_locked_shapes_and_their_text_fit() {
+    let (mut s, [a, b]) = resize_selection_scene();
+    pending_resize_autofit(&mut s, &[b]);
+    s.execute("shape.lock", &json!({"ids": [b], "locked": true})).unwrap();
+    s.execute("edit.select", &json!({"ids": [a, b]})).unwrap();
+    let locked = s.doc().unwrap().shape(ShapeId(b as u32)).unwrap().clone();
+    let before = s.doc().unwrap().doc.clone();
+    let steps = s.doc().unwrap().history.undo.len();
+    drag_gesture(&mut s, (200.0, 180.0), (250.0, 210.0));
+    assert_eq!(box_of(&mut s, a)["w"], 150.0);
+    assert_eq!(box_of(&mut s, a)["h"], 110.0);
+    assert_eq!(s.doc().unwrap().shape(ShapeId(b as u32)).unwrap(), &locked, "the locked shape is neither resized nor refitted");
+    assert_eq!(s.doc().unwrap().history.undo.len(), steps + 1);
+    s.execute("edit.undo", &json!({})).unwrap();
+    assert_eq!(s.doc().unwrap().doc, before);
+}
+
+#[test]
+fn resizing_selected_shapes_does_not_snap_to_other_resize_targets() {
+    for reverse in [false, true] {
+        let (mut s, [a, b]) = resize_selection_scene();
+        s.prefs.smart_guides = true;
+        let ids = if reverse { [b, a] } else { [a, b] };
+        s.execute("edit.select", &json!({"ids": ids})).unwrap();
+        // Within snap tolerance of the other selected shape's original right edge.
+        drag_gesture(&mut s, (200.0, 140.0), (203.0, 140.0));
+        assert_eq!(box_of(&mut s, a)["w"], 103.0, "first shape must not snap back");
+        assert_eq!(box_of(&mut s, b)["w"], 83.0, "selection order must not affect snapping");
+    }
+}
+
+#[test]
+fn resizing_selected_shapes_still_snaps_to_stationary_shapes() {
+    let (mut s, [a, b]) = resize_selection_scene();
+    let fixed = s.execute("shape.insert", &json!({"preset": "rect", "rect": [207, 430, 100, 80]})).unwrap()["id"].as_u64().unwrap();
+    let fixed_before = box_of(&mut s, fixed);
+    s.execute("edit.select", &json!({"ids": [a, b]})).unwrap();
+    s.prefs.smart_guides = true;
+    drag_gesture(&mut s, (200.0, 140.0), (203.0, 140.0));
+    assert_eq!(box_of(&mut s, a)["w"], 107.0);
+    assert_eq!(box_of(&mut s, b)["w"], 87.0);
+    assert_eq!(box_of(&mut s, fixed), fixed_before);
+}
+
 /// #961: dragging the east handle snaps the dragged (right) edge, even when the fixed left edge
 /// already lines up with another shape. The nearest line used to be the fixed edge's, at distance 0.
 #[test]
