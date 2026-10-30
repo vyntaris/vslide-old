@@ -27,7 +27,11 @@ impl Session {
                 return self.drag_move(MoveDrag { ids, start, origs, moved, duplicate, enter_text }, p, mods, tol);
             }
             Drag::Resize { id, orig, ids, handle, origs, start } => {
-                let nx = resize_box(&orig, handle, p - start, mods.shift || self.is_picture(id), mods.alt);
+                if orig.w <= 0.0 || orig.h <= 0.0 {
+                    return Ok(Value::Null);
+                }
+                let keep_aspect = mods.shift || self.is_picture(id);
+                let nx = resize_box(&orig, handle, p - start, keep_aspect, mods.alt);
                 let nx = self.snap_resize(nx, handle, &ids, tol);
                 let sx = if orig.w > 1e-9 { (nx.w / orig.w) * if nx.flip_h != orig.flip_h { -1.0 } else { 1.0 } - 1.0 } else { 0.0 };
                 let sy = if orig.h > 1e-9 { (nx.h / orig.h) * if nx.flip_v != orig.flip_v { -1.0 } else { 1.0 } - 1.0 } else { 0.0 };
@@ -51,7 +55,7 @@ impl Session {
                                 hx * sx * o.w / div * if o.flip_h { -1.0 } else { 1.0 },
                                 hy * sy * o.h / div * if o.flip_v { -1.0 } else { 1.0 },
                             );
-                        resize_box(o, handle, Vec2::new(lp.x, lp.y), mods.shift || self.is_picture(*tid), mods.alt)
+                        resize_box(o, handle, Vec2::new(lp.x, lp.y), keep_aspect, mods.alt)
                     };
                     self.set_xfrm(*tid, target_nx)?;
                 }
