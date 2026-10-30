@@ -29,3 +29,5 @@ jobs:
     with:
       app-name: vslide
       app-dir: VSlide
+      install-relative-path: Programs/ArtCraft/VSlide
+      install-scope: perUser
