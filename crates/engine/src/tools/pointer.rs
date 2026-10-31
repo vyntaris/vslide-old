@@ -220,6 +220,7 @@ impl Session {
         }
     }
 
+    /// Handle a pointer press and start the applicable tool interaction.
     fn down(&mut self, p: Point, mods: Mods, tol: f64) -> Result<Value> {
         if let Some(Drag::Freeform { mode, mut points, .. }) = self.tool.drag.clone() {
             // Next click of a freeform: close on the start point, else add a vertex.
@@ -440,6 +441,7 @@ impl Session {
         Ok(json!({"hit": serde_json::to_value(&hit).unwrap_or_default()}))
     }
 
+    /// Handle a pointer release and finalize the active tool interaction.
     fn up(&mut self, p: Point, mods: Mods) -> Result<Value> {
         let drag = self.tool.drag.take();
         self.tool.guides.clear();

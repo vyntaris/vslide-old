@@ -13,6 +13,7 @@ struct MoveDrag {
 }
 
 impl Session {
+    /// Update the active drag interaction using the pointer position and modifiers.
     pub(super) fn drag(&mut self, p: Point, mods: Mods, tol: f64) -> Result<Value> {
         let Some(drag) = self.tool.drag.clone() else { return Ok(Value::Null) };
         match drag {
