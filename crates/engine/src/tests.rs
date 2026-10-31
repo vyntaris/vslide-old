@@ -5617,6 +5617,66 @@ fn resizing_selected_shapes_still_snaps_to_stationary_shapes() {
     assert_eq!(box_of(&mut s, fixed), fixed_before);
 }
 
+/// Secondary pictures resize uniformly around their anchor, preserving independent flips
+/// and keeping the complete multi-selection resize in one undo step.
+#[test]
+fn resizing_selected_shapes_resizes_secondary_pictures() {
+    // Pointer destination, Alt, expected rectangle, expected picture, expected flips.
+    let cases = [
+        ((180.0, 200.0), false, [100.0, 100.0, 80.0, 100.0], [300.0, 300.0, 80.0, 80.0], [false, false]),
+        ((200.0, 180.0), false, [100.0, 100.0, 100.0, 80.0], [300.0, 300.0, 80.0, 80.0], [false, false]),
+        ((220.0, 200.0), false, [100.0, 100.0, 120.0, 100.0], [300.0, 300.0, 120.0, 120.0], [false, false]),
+        ((200.0, 220.0), false, [100.0, 100.0, 100.0, 120.0], [300.0, 300.0, 120.0, 120.0], [false, false]),
+        ((180.0, 200.0), true, [120.0, 100.0, 60.0, 100.0], [320.0, 320.0, 60.0, 60.0], [false, false]),
+        ((200.0, 180.0), true, [100.0, 120.0, 100.0, 60.0], [320.0, 320.0, 60.0, 60.0], [false, false]),
+        ((80.0, 200.0), false, [80.0, 100.0, 20.0, 100.0], [280.0, 300.0, 20.0, 20.0], [true, false]),
+        ((200.0, 80.0), false, [100.0, 80.0, 100.0, 20.0], [300.0, 280.0, 20.0, 20.0], [false, true]),
+    ];
+
+    for (to, alt, expected_rect, expected_picture, flips) in cases {
+        let mut s = session();
+        s.execute("slide.new", &json!({"layout": "blank"})).unwrap();
+        s.prefs.smart_guides = false;
+        s.prefs.snap_to_grid = false;
+
+        let rect = s.execute("shape.insert", &json!({"preset": "rect", "rect": [100, 100, 100, 100]})).unwrap()["id"].as_u64().unwrap();
+        let picture = ramp_picture(&mut s, 1, [300, 300, 100, 100]).as_u64().unwrap();
+        s.execute("edit.select", &json!({"ids": [rect, picture]})).unwrap();
+
+        let before = s.doc().unwrap().doc.clone();
+        let steps = s.doc().unwrap().history.undo.len();
+        let mods = Mods { alt, ..Default::default() };
+        let ev = |kind, (x, y): (f64, f64)| PointerEvent { kind, x, y, mods, tol: 3.0, pressure: None };
+
+        let down = s.pointer(ev(PointerKind::Down, (200.0, 200.0))).unwrap();
+        assert_eq!(down["hit"]["kind"], "resize");
+        assert_eq!(down["hit"]["id"], rect);
+        assert_eq!(down["hit"]["handle"], 4);
+
+        s.pointer(ev(PointerKind::Drag, ((200.0 + to.0) / 2.0, (200.0 + to.1) / 2.0))).unwrap();
+        s.pointer(ev(PointerKind::Drag, to)).unwrap();
+        s.pointer(ev(PointerKind::Up, to)).unwrap();
+
+        for (id, expected) in [(rect, expected_rect), (picture, expected_picture)] {
+            let actual = box_of(&mut s, id);
+            for (key, value) in ["x", "y", "w", "h"].into_iter().zip(expected) {
+                let got = actual[key].as_f64().unwrap();
+                assert!((got - value).abs() < 1e-9, "{to:?}, alt={alt}, shape={id}, {key}: expected {value}, got {got}");
+            }
+
+            let xfrm = s.doc().unwrap().shape(ShapeId(id as u32)).unwrap().xfrm.unwrap();
+            assert_eq!([xfrm.flip_h, xfrm.flip_v], flips, "{to:?}, alt={alt}, shape={id}");
+        }
+
+        assert_eq!(s.doc().unwrap().history.undo.len(), steps + 1);
+        let after = s.doc().unwrap().doc.clone();
+        s.execute("edit.undo", &json!({})).unwrap();
+        assert_eq!(s.doc().unwrap().doc, before);
+        s.execute("edit.redo", &json!({})).unwrap();
+        assert_eq!(s.doc().unwrap().doc, after);
+    }
+}
+
 /// #961: dragging the east handle snaps the dragged (right) edge, even when the fixed left edge
 /// already lines up with another shape. The nearest line used to be the fixed edge's, at distance 0.
 #[test]

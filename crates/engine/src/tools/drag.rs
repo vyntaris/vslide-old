@@ -47,12 +47,24 @@ impl Session {
                     let target_nx = if *tid == id {
                         nx
                     } else {
+                        let picture = self.is_picture(*tid);
+                        let (sx, sy) = if picture && matches!(handle, 0 | 2 | 4 | 6) {
+                            // Use the axis with the larger relative change so an unchanged
+                            // dimension cannot cancel shrinking. Preserve each axis's flip.
+                            let scale_x = 1.0 + sx;
+                            let scale_y = 1.0 + sy;
+                            let scale = if sx.abs() >= sy.abs() { scale_x.abs() } else { scale_y.abs() };
+                            (scale.copysign(scale_x) - 1.0, scale.copysign(scale_y) - 1.0)
+                        } else {
+                            (sx, sy)
+                        };
+
                         let lp = Affine::rotate(o.rot.to_radians())
                             * Point::new(
                                 hx * sx * o.w / div * if o.flip_h { -1.0 } else { 1.0 },
                                 hy * sy * o.h / div * if o.flip_v { -1.0 } else { 1.0 },
                             );
-                        resize_box(o, handle, Vec2::new(lp.x, lp.y), self.is_picture(*tid), mods.alt)
+                        resize_box(o, handle, Vec2::new(lp.x, lp.y), picture, mods.alt)
                     };
                     self.set_xfrm(*tid, target_nx)?;
                 }
