@@ -55,7 +55,7 @@ impl Session {
                                 hx * sx * o.w / div * if o.flip_h { -1.0 } else { 1.0 },
                                 hy * sy * o.h / div * if o.flip_v { -1.0 } else { 1.0 },
                             );
-                        resize_box(o, handle, Vec2::new(lp.x, lp.y), keep_aspect, mods.alt)
+                        resize_box(o, handle, Vec2::new(lp.x, lp.y), self.is_picture(*tid), mods.alt)
                     };
                     self.set_xfrm(*tid, target_nx)?;
                 }
