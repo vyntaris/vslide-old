@@ -27,9 +27,6 @@ impl Session {
                 return self.drag_move(MoveDrag { ids, start, origs, moved, duplicate, enter_text }, p, mods, tol);
             }
             Drag::Resize { id, orig, ids, handle, origs, start } => {
-                if orig.w <= 0.0 || orig.h <= 0.0 {
-                    return Ok(Value::Null);
-                }
                 let keep_aspect = mods.shift || self.is_picture(id);
                 let nx = resize_box(&orig, handle, p - start, keep_aspect, mods.alt);
                 let nx = self.snap_resize(nx, handle, &ids, tol);
