@@ -359,7 +359,13 @@ pub fn pdf_options(p: &Value, count: usize) -> Result<vslide_pdf::PdfOptions> {
     let mut o = vslide_pdf::PdfOptions { layout: vslide_pdf::PageLayout::Slides, ..Default::default() };
     o.layout = match str_param(p, "layout").unwrap_or("slides") {
         "notes" => vslide_pdf::PageLayout::Notes,
-        "handouts" => vslide_pdf::PageLayout::Handouts { per_page: usize_param(p, "perPage").unwrap_or(6).clamp(1, 9) as u8 },
+        "handouts" => {
+            let per_page = usize_param(p, "perPage").unwrap_or(6);
+            if ![1, 2, 3, 4, 6, 9].contains(&per_page) {
+                return Err(bad("file.export", format!("perPage {per_page} isn't one of 1, 2, 3, 4, 6, 9")));
+            }
+            vslide_pdf::PageLayout::Handouts { per_page: per_page as u8 }
+        }
         _ => vslide_pdf::PageLayout::Slides,
     };
     o.dpi = f64_or(p, "dpi", o.dpi).clamp(36.0, 600.0);
