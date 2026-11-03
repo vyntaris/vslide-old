@@ -10,7 +10,6 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use vslide_model::table::TableStyleDef;
-use vslide_model::text::{Action, Hyperlink, RunProps, TextBody};
 use vslide_model::text::{Action, Hyperlink, ListStyle, RunProps, Spacing, TextBody};
 use vslide_model::{LayoutId, Master, MasterId, MediaId, Presentation, ShapeId, ShapeKind, Slide, SlideId};
 use serde_json::{Value, json};
