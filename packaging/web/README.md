@@ -113,8 +113,9 @@ VSlide doesn't learn the name the page finally stores a Save As under, so a page
 on a conflict should map later Saves of the old name itself.
 
 In host mode VSlide starts with an empty presentation instead of the sample, and the first
-presentation the page sends takes its place. The page guards leaving itself (VSlide adds no
-guard of its own), and `&author=Name` signs the user's comments.
+presentation the page sends takes its place unless the user has changed it; later ones open
+beside it. The page guards leaving itself (VSlide adds no guard of its own), and
+`&author=Name` signs the user's comments.
 
 ```html
 <iframe id="deck" src="/vslide/?host=parent&author=Ada" style="width: 100%; height: 720px; border: 0;"></iframe>
