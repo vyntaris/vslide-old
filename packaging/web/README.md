@@ -90,7 +90,7 @@ Messages are plain objects with a `type`:
 | `vslide:open` | from the page | `name` (a bare file name, such as `Talk.pptx`), `bytes` (`ArrayBuffer` or `Uint8Array`). Opens like File › Open: a presentation (.pptx, .potx, .ppsx, .vslide) has that name as its file; an outline (.txt, .md, .rtf), a file sent without a name and a damaged file open untitled. |
 | `vslide:save` | to the page | `name`, `saveAs`, `bytes` (a transferred `ArrayBuffer`), for every file VSlide would otherwise download. The page stores it. |
 | `vslide:dirty` | to the page | `dirty`, whenever unsaved changes appear or go away. |
-| `vslide:failed` | to the page | `error`, when the app couldn't start (no WebGPU or WebGL2). |
+| `vslide:failed` | to the page | `error`, when the app couldn't start (no WebGPU or WebGL2) or refused a file over 2 GiB. |
 
 `saveAs` says whether the file becomes the presentation's file, as on the desktop:
 
