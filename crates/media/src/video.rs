@@ -3,8 +3,8 @@
 
 use std::collections::VecDeque;
 
-use vslide_isobmff::CodecConfig;
-use vslide_matroska::Codec as MkvCodec;
+use craft_media::isobmff::CodecConfig;
+use craft_media::matroska::Codec as MkvCodec;
 
 use crate::yuv::{self, Matrix, Planes};
 use crate::{Bytes, Container, MediaError, Result};
@@ -257,8 +257,8 @@ struct Track {
 }
 
 enum Demux {
-    Mp4(Box<vslide_isobmff::Mp4File>, usize),
-    Mkv(Box<vslide_matroska::MkvFile>, usize),
+    Mp4(Box<craft_media::isobmff::Mp4File>, usize),
+    Mkv(Box<craft_media::matroska::MkvFile>, usize),
 }
 
 impl Demux {
@@ -273,8 +273,8 @@ impl Demux {
 fn open_track(bytes: &[u8]) -> Result<(Demux, Track, Box<dyn Codec>)> {
     match Container::sniff(bytes) {
         Container::Mp4 => {
-            let f = vslide_isobmff::open(bytes).map_err(dec_err)?;
-            let ti = f.track_of_kind(vslide_isobmff::TrackKind::Video).ok_or(MediaError::Missing("video track"))?;
+            let f = craft_media::isobmff::open(bytes).map_err(dec_err)?;
+            let ti = f.track_of_kind(craft_media::isobmff::TrackKind::Video).ok_or(MediaError::Missing("video track"))?;
             let t = &f.tracks[ti];
             let entry = t.entries.first().ok_or(MediaError::Missing("video track"))?;
             let codec: Box<dyn Codec> = match &entry.codec {
@@ -290,11 +290,11 @@ fn open_track(bytes: &[u8]) -> Result<(Demux, Track, Box<dyn Codec>)> {
             Ok((Demux::Mp4(Box::new(f), ti), track, codec))
         }
         Container::Matroska => {
-            let f = vslide_matroska::open(bytes).map_err(dec_err)?;
+            let f = craft_media::matroska::open(bytes).map_err(dec_err)?;
             let ti = f
                 .tracks
                 .iter()
-                .position(|t| t.kind == vslide_matroska::TrackKind::Video && !t.samples.is_empty())
+                .position(|t| t.kind == craft_media::matroska::TrackKind::Video && !t.samples.is_empty())
                 .ok_or(MediaError::Missing("video track"))?;
             let t = &f.tracks[ti];
             let codec: Box<dyn Codec> = match &t.codec {
@@ -303,7 +303,7 @@ fn open_track(bytes: &[u8]) -> Result<(Demux, Track, Box<dyn Codec>)> {
                 MkvCodec::Vp9 { .. } => Box::new(Vp9 { dec: vslide_vp9::Decoder::new() }),
                 MkvCodec::Av1 { av1c } => Box::new(Av1 {
                     dec: vslide_av1::Decoder::new(),
-                    config_obus: vslide_isobmff::Av1Config::parse(av1c).map(|c| c.config_obus).unwrap_or_default(),
+                    config_obus: craft_media::isobmff::Av1Config::parse(av1c).map(|c| c.config_obus).unwrap_or_default(),
                     primed: false,
                 }),
                 other => return Err(MediaError::Unsupported(format!("{} video", mkv_codec_name(other)))),
