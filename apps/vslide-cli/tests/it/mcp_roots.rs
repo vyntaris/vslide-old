@@ -7,7 +7,7 @@ use std::process::{Command, Output, Stdio};
 use serde_json::Value;
 
 fn bin() -> Command {
-    Command::new(env!("CARGO_BIN_EXE_vslide-cli"))
+    Command::new(crate::vslide_cli())
 }
 
 fn run(args: &[&str]) -> Output {
