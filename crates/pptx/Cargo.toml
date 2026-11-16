@@ -12,6 +12,7 @@ workspace = true
 craft-opc.workspace = true
 craft-xml.workspace = true
 craft-cfb.workspace = true
+craft-drawingml.workspace = true
 vslide-model = { workspace = true }
 vslide-geom = { workspace = true }
 vslide-color = { workspace = true }
