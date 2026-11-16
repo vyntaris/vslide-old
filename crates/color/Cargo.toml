@@ -9,4 +9,4 @@ description = "VSlide colour: RGB/HSL, theme colour slots, DrawingML-style colou
 workspace = true
 
 [dependencies]
-serde = { workspace = true }
+craft-drawingml = { workspace = true }

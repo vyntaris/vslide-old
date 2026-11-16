@@ -9,6 +9,9 @@ description = "VSlide PPTX: Office Open XML (PresentationML/DrawingML) import an
 workspace = true
 
 [dependencies]
+craft-opc.workspace = true
+craft-xml.workspace = true
+craft-cfb.workspace = true
 vslide-model = { workspace = true }
 vslide-geom = { workspace = true }
 vslide-color = { workspace = true }
