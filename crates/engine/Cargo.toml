@@ -9,6 +9,7 @@ description = "VSlide engine: sessions, undo history, selection, the command reg
 workspace = true
 
 [dependencies]
+craft-mime = { workspace = true }
 vslide-geom = { workspace = true }
 vslide-color = { workspace = true }
 vslide-model = { workspace = true }
