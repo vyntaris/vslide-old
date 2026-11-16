@@ -10,6 +10,7 @@ workspace = true
 
 [dependencies]
 craft-opc.workspace = true
+craft-xml.workspace = true
 vslide-model = { workspace = true }
 vslide-geom = { workspace = true }
 vslide-color = { workspace = true }
