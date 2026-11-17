@@ -433,6 +433,15 @@ pub(crate) fn shape_of(s: &Session, id: ShapeId) -> Result<vslide_model::Shape> 
 pub fn xfrm_of(doc: &vslide_model::Presentation, sel: &crate::Selection, shape: &vslide_model::Shape) -> Xfrm {
     let mut x = shape.xfrm.unwrap_or_else(|| ctx_xfrm(doc, sel, shape));
     if let vslide_model::ShapeKind::Table(t) = &shape.kind {
+        // A loaded table may not be normalized yet: measure the bounded grid an edit will
+        // leave, not every cell the file stored.
+        let normalized;
+        let t = if t.is_normalized() {
+            t
+        } else {
+            normalized = t.normalized();
+            &normalized
+        };
         let drawn: f64 = table_drawn_heights(doc, sel, t).iter().sum();
         if drawn.is_finite() && drawn > x.h {
             x.h = drawn;
