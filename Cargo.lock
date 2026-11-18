@@ -1358,6 +1358,7 @@ dependencies = [
  "vslide-engine",
  "vslide-geom",
  "vslide-model",
+ "vslide-text",
  "image",
  "log",
  "quick-xml 0.41.0",
