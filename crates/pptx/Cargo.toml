@@ -11,7 +11,11 @@ workspace = true
 [dependencies]
 craft-opc.workspace = true
 craft-xml.workspace = true
+craft-cfb.workspace = true
+craft-drawingml.workspace = true
+craft-drawingml-table.workspace = true
 vslide-model = { workspace = true }
+vslide-text = { workspace = true }
 vslide-geom = { workspace = true }
 vslide-color = { workspace = true }
 quick-xml = { workspace = true }
