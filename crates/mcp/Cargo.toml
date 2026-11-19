@@ -9,6 +9,7 @@ description = "VSlide MCP server: JSON-RPC 2.0 over stdio, driving a running app
 workspace = true
 
 [dependencies]
+craft-mcp-server = { workspace = true }
 vslide-engine = { workspace = true }
 vslide-render = { workspace = true }
 serde_json = { workspace = true }
