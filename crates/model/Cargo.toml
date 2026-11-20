@@ -9,6 +9,7 @@ description = "VSlide document model: presentations, masters, layouts, slides, s
 workspace = true
 
 [dependencies]
+craft-drawingml = { workspace = true }
 vslide-geom = { workspace = true }
 vslide-color = { workspace = true }
 serde = { workspace = true }
