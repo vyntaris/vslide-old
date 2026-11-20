@@ -71,9 +71,15 @@
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\vslide.exe\SupportedTypes" Name=".pptx" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\vslide.exe\SupportedTypes" Name=".potx" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\Applications\vslide.exe\SupportedTypes" Name=".ppsx" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\vslide.exe\SupportedTypes" Name=".ppt" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\vslide.exe\SupportedTypes" Name=".pot" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\Applications\vslide.exe\SupportedTypes" Name=".pps" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\.pptx\OpenWithProgids" Name="VSlide.Presentation" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\.potx\OpenWithProgids" Name="VSlide.Presentation" Value="" Type="string" />
         <RegistryValue Root="HKMU" Key="Software\Classes\.ppsx\OpenWithProgids" Name="VSlide.Presentation" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\.ppt\OpenWithProgids" Name="VSlide.Presentation" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\.pot\OpenWithProgids" Name="VSlide.Presentation" Value="" Type="string" />
+        <RegistryValue Root="HKMU" Key="Software\Classes\.pps\OpenWithProgids" Name="VSlide.Presentation" Value="" Type="string" />
 
         <RegistryValue Root="HKMU" Key="Software\Microsoft\Windows\CurrentVersion\App Paths\vslide.exe" Value="[#VslideExe]" Type="string" />
       <RegistryValue Root="HKMU" Key="Software\VSlide" Name="InstallDir" Value="[INSTALLFOLDER]" Type="string" />

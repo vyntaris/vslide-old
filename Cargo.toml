@@ -32,6 +32,7 @@ vslide-text = { path = "crates/text" }
 vslide-render = { path = "crates/render" }
 vslide-pdf = { path = "crates/pdf" }
 vslide-pptx = { path = "crates/pptx" }
+vslide-ppt = { path = "crates/ppt" }
 vslide-format = { path = "crates/format" }
 vslide-anim = { path = "crates/anim" }
 vslide-engine = { path = "crates/engine" }
@@ -79,6 +80,7 @@ craft-ui = { git = "https://github.com/storytold/craft-libs", rev = "63196e66f30
 i_overlay = "9"
 quick-xml = "0.41"
 zip = { version = "3", default-features = false, features = ["deflate"] }
+miniz_oxide = { version = "0.9", default-features = false, features = ["with-alloc"] }
 
 # ui
 egui = { version = "0.37", default-features = false }
