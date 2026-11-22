@@ -1,0 +1,22 @@
+[package]
+name = "vslide-ppt"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "VSlide legacy PowerPoint 97-2003 (.ppt/.pot/.pps) import, written from the public [MS-PPT], [MS-ODRAW] and [MS-CFB] Open Specifications"
+
+[lints]
+workspace = true
+
+[dependencies]
+vslide-model = { workspace = true }
+vslide-geom = { workspace = true }
+vslide-color = { workspace = true }
+miniz_oxide = { workspace = true }
+thiserror = { workspace = true }
+log = { workspace = true }
+
+[dev-dependencies]
+vslide-engine = { workspace = true }
+serde_json = { workspace = true }
+image = { workspace = true }

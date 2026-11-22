@@ -168,6 +168,16 @@ fn open_other(name: &str, bytes: &[u8]) -> Result<(Presentation, Vec<String>, Ve
     if vslide_pptx::is_encrypted(bytes) {
         return Err(EngineError::Other(format!("{name} is password-protected. VSlide can't open password-protected presentations yet.")));
     }
+    if vslide_ppt::sniff(bytes) {
+        let (mut p, lost) = vslide_ppt::import_checked(bytes).map_err(|e| match e {
+            vslide_ppt::PptError::Encrypted => {
+                EngineError::Other(format!("{name} is password-protected. VSlide can't open password-protected presentations yet."))
+            }
+            other => EngineError::Other(format!("{name}: {other}")),
+        })?;
+        vslide_format::repair(&mut p);
+        return Ok((p, lost, vec![]));
+    }
     let lower = name.to_ascii_lowercase();
     let rtf = vslide_format::rtf::sniff_rtf(bytes);
     if rtf || lower.ends_with(".txt") || lower.ends_with(".md") {
