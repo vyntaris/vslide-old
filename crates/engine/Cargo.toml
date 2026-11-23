@@ -20,6 +20,8 @@ vslide-pdf = { workspace = true }
 vslide-format = { workspace = true }
 vslide-pptx = { workspace = true }
 vslide-ppt = { workspace = true }
+vyntaris-office-crypt = { workspace = true }
+zeroize = { workspace = true }
 vslide-media = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

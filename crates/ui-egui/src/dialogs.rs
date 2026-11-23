@@ -15,11 +15,14 @@ pub struct Dialog {
     /// Field values while the dialog is open.
     #[serde(skip)]
     pub fields: std::collections::HashMap<String, String>,
+    /// The Password dialog's password: kept out of `fields`, wiped when dropped.
+    #[serde(skip)]
+    secret: vslide_engine::Password,
 }
 
 impl Dialog {
     pub fn new(id: &str) -> Self {
-        Dialog { id: id.into(), params: Value::Null, fields: Default::default() }
+        Dialog { id: id.into(), params: Value::Null, fields: Default::default(), secret: Default::default() }
     }
     pub fn modal(&self) -> bool {
         true
@@ -71,6 +74,7 @@ fn title(id: &str) -> &'static str {
         "bullets" => "Bullets and Numbering",
         "action" => "Action Settings",
         "quit" => "VSlide",
+        "password" => "Password",
         "themeColors" => "Create New Theme Colors",
         "themeFonts" => "Create New Theme Fonts",
         _ => "VSlide",
@@ -215,6 +219,7 @@ mod grid_options;
 mod hyperlink;
 mod language;
 mod paragraph;
+mod password;
 mod photo_album;
 mod preferences;
 mod size_position;

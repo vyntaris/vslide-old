@@ -144,7 +144,8 @@ pub fn save(s: &Session, dir: &Path) -> Result<usize> {
     claim_dir(dir);
     let mut n = 0;
     for d in s.documents() {
-        if !d.is_dirty() {
+        // a password-protected presentation is never written unencrypted
+        if !d.is_dirty() || d.password.is_some() {
             discard(dir, d.uid);
             continue;
         }

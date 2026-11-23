@@ -1,5 +1,17 @@
-VSlide
-Copyright (c) 2026 ArtCraft Team and the VSlide contributors.
+VSlide (Vyntaris Office)
+Copyright (c) 2026 Vyntaris, for the changes made for Vyntaris Office.
+
+VSlide is a modified version of DeckCraft by the ArtCraft Team and contributors
+(https://github.com/storytold/deckcraft), under the same licence: the MIT License or the Apache
+License 2.0, at your option (LICENSE-MIT, LICENSE-APACHE). The changes are licensed the same way.
+DeckCraft's name was replaced by VSlide throughout; VSlide does not use the ArtCraft name, wordmark or
+logos. Vyntaris's own parts are in shared/ (office-crypt, gtk-theme). DeckCraft's own notice
+follows, unchanged.
+
+-------------------------------------------------------------------------------------------------
+
+DeckCraft
+Copyright (c) 2026 ArtCraft Team and the DeckCraft contributors.
 Licensed under the MIT License or the Apache License, Version 2.0, at your option
 (LICENSE-MIT, LICENSE-APACHE).
 

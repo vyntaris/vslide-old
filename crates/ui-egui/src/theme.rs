@@ -1,4 +1,4 @@
-//! Design tokens (light, PowerPoint-like; and dark) and fonts for the UI.
+//! Design tokens (light and dark, or the desktop's GTK theme) and fonts for the UI.
 
 use egui::{Color32, CornerRadius, FontData, FontDefinitions, FontFamily, Stroke, Visuals};
 use serde::{Deserialize, Serialize};
@@ -6,9 +6,22 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Brightness {
+    /// Follow the desktop: its GTK theme's darkness and colours (light when there is none).
     #[default]
+    System,
     Light,
     Dark,
+}
+
+impl Brightness {
+    /// Whether the interface is dark.
+    pub fn is_dark(self) -> bool {
+        match self {
+            Brightness::System => gtk_dark().unwrap_or(false),
+            Brightness::Light => false,
+            Brightness::Dark => true,
+        }
+    }
 }
 
 /// Every colour the chrome uses.
@@ -118,14 +131,115 @@ impl Tokens {
         }
     }
     pub fn for_brightness(b: Brightness) -> Self {
-        match b {
-            Brightness::Light => Self::light(),
-            Brightness::Dark => Self::dark(),
-        }
+        palette(b.is_dark())
     }
     pub fn get(ctx: &egui::Context) -> Self {
-        if ctx.global_style().visuals.dark_mode { Self::dark() } else { Self::light() }
+        palette(ctx.global_style().visuals.dark_mode)
     }
+
+    /// The palette from a GTK theme's colours, laid over the built-in palette of the same darkness
+    /// for anything it doesn't name. Slides keep their own colours.
+    pub fn from_gtk(g: &crate::gtk_theme::GtkColors) -> Option<Tokens> {
+        let dark = g.dark()?;
+        let mut t = if dark { Tokens::dark() } else { Tokens::light() };
+        let bg = g.get("window_bg_color")?;
+        let fg = g.get("window_fg_color").unwrap_or(t.text);
+        let mix = |a: Color32, b: Color32, f: f32| {
+            let m = |x: u8, y: u8| (f32::from(x) + (f32::from(y) - f32::from(x)) * f).round() as u8;
+            Color32::from_rgb(m(a.r(), b.r()), m(a.g(), b.g()), m(a.b(), b.b()))
+        };
+        let head = g.get("headerbar_bg_color").unwrap_or(bg);
+        let view = g.get("view_bg_color").unwrap_or(bg);
+        let card = g.get("card_bg_color").filter(|c| c.a() == 255).unwrap_or_else(|| mix(bg, fg, 0.08));
+        let border = g.get("headerbar_border_color").filter(|c| c.a() == 255).unwrap_or_else(|| mix(bg, fg, 0.12));
+        let accent = g.get("accent_bg_color").or_else(|| g.get("accent_color")).unwrap_or(t.accent);
+        t.chrome = head;
+        t.card = bg;
+        t.card_border = border;
+        t.canvas = if dark { mix(head, Color32::BLACK, 0.3) } else { mix(bg, Color32::BLACK, 0.06) };
+        t.text = fg;
+        t.text_dim = mix(fg, bg, 0.3);
+        t.text_faint = mix(fg, bg, 0.55);
+        t.border = mix(bg, fg, 0.22);
+        t.separator = border;
+        t.hover = mix(bg, fg, 0.08);
+        t.pressed = mix(bg, fg, 0.15);
+        t.selected = mix(bg, fg, 0.12);
+        t.accent = accent;
+        t.accent_text = g.get("accent_fg_color").unwrap_or(t.accent_text);
+        t.contextual = mix(accent, Color32::BLACK, 0.2);
+        t.guide = accent;
+        t.text_selection = Color32::from_rgba_unmultiplied(accent.r(), accent.g(), accent.b(), 90);
+        t.field_bg = if dark { card } else { view };
+        Some(t)
+    }
+}
+
+/// The GTK theme's palette, when it's followed and names its colours ([`refresh_gtk`]).
+static GTK_TOKENS: std::sync::RwLock<Option<Tokens>> = std::sync::RwLock::new(None);
+
+/// Read the followed GTK theme's colours again (after [`crate::gtk_theme`] saw them change).
+pub fn refresh_gtk() {
+    let tokens = crate::gtk_theme::current().as_ref().and_then(Tokens::from_gtk);
+    if let Ok(mut t) = GTK_TOKENS.write() {
+        *t = tokens;
+    }
+}
+
+/// Whether the followed GTK theme is dark (`None`: no GTK theme followed).
+pub fn gtk_dark() -> Option<bool> {
+    GTK_TOKENS.read().ok()?.as_ref().map(|t| t.dark)
+}
+
+/// The palette for a light or dark interface: the GTK theme's when it's followed and of that
+/// darkness, else the built-in one.
+pub fn palette(dark: bool) -> Tokens {
+    match GTK_TOKENS.read().ok().and_then(|t| *t) {
+        Some(t) if t.dark == dark => t,
+        _ if dark => Tokens::dark(),
+        _ => Tokens::light(),
+    }
+}
+
+/// The font file fontconfig picks for a pattern (`Inter`, `Inter:bold`) and the face's index in it.
+fn fc_match(pattern: &str) -> Option<(String, u32)> {
+    let out = std::process::Command::new("fc-match").args(["-f", "%{file}\t%{index}", pattern]).output().ok()?;
+    let text = String::from_utf8(out.stdout).ok()?;
+    let (path, index) = text.split_once('\t')?;
+    (out.status.success() && !path.is_empty()).then(|| (path.to_string(), index.trim().parse().unwrap_or(0)))
+}
+
+/// The desktop's interface font family, as GTK names it (`gtk-font-name=Inter 10`).
+fn gtk_font_family() -> Option<String> {
+    let config = std::env::var_os("XDG_CONFIG_HOME")
+        .map(std::path::PathBuf::from)
+        .or_else(|| std::env::var_os("HOME").map(|h| std::path::PathBuf::from(h).join(".config")))?;
+    ["gtk-4.0/settings.ini", "gtk-3.0/settings.ini"].iter().find_map(|f| {
+        let text = std::fs::read_to_string(config.join(f)).ok()?;
+        let value = text.lines().find_map(|l| l.trim().strip_prefix("gtk-font-name="))?.trim();
+        let family: Vec<&str> = value
+            .split_whitespace()
+            .take_while(|w| w.parse::<f32>().is_err() && !matches!(*w, "Bold" | "Italic" | "Regular" | "Medium" | "Light" | "Semi-Bold"))
+            .collect();
+        (!family.is_empty()).then(|| family.join(" "))
+    })
+}
+
+/// The desktop's interface font (regular and bold), read from disk, if GTK names one.
+fn gtk_ui_fonts() -> Option<(FontData, FontData)> {
+    if !crate::gtk_theme::enabled() {
+        return None;
+    }
+    let family = gtk_font_family()?;
+    let load = |pattern: &str| -> Option<FontData> {
+        let (path, index) = fc_match(pattern)?;
+        let mut d = FontData::from_owned(std::fs::read(path).ok()?);
+        d.index = index;
+        Some(d)
+    };
+    let regular = load(&family)?;
+    let bold = load(&format!("{family}:bold")).unwrap_or_else(|| regular.clone());
+    Some((regular, bold))
 }
 
 /// Apply tokens to egui's style.
@@ -204,14 +318,34 @@ pub fn font_definitions(extra: &[std::sync::Arc<vslide_fonts::FontFace>]) -> Fon
         defs.font_data.insert(name.clone(), std::sync::Arc::new(FontData::from_static(f.bytes)));
         names.push((f.family, f.style, name));
     }
-    let regular: Vec<String> = names.iter().filter(|(fam, st, _)| !(*fam == "Inter" && *st != "Regular")).map(|(_, _, n)| n.clone()).collect();
+    let mut regular: Vec<String> = names.iter().filter(|(fam, st, _)| !(*fam == "Inter" && *st != "Regular")).map(|(_, _, n)| n.clone()).collect();
+    let mut bold: Vec<String> = names.iter().filter(|(fam, st, _)| *fam == "Inter" && *st == "SemiBold").map(|(_, _, n)| n.clone()).collect();
+    // The desktop's interface font first, when the GTK theme names one.
+    if let Some((r, b)) = gtk_ui_fonts() {
+        defs.font_data.insert("gtk-ui".into(), std::sync::Arc::new(r));
+        defs.font_data.insert("gtk-ui-bold".into(), std::sync::Arc::new(b));
+        regular.insert(0, "gtk-ui".into());
+        bold.insert(0, "gtk-ui-bold".into());
+    }
     if let Some(list) = defs.families.get_mut(&FontFamily::Proportional) {
         for (k, n) in regular.iter().enumerate() {
             list.insert(k, n.clone());
         }
     }
+    // A build without craft-fonts has no CJK or Arabic face: the installed ones stand in, last, so
+    // the names in Review › Language (and CJK file names) aren't drawn as boxes.
+    let embedded = |family: &str| names.iter().any(|(f, _, _)| *f == family);
+    for (missing, key, files) in
+        [(!embedded("BIZ UDPGothic"), "system-cjk", &CJK_FILES[..]), (!embedded("Noto Sans Arabic"), "system-arabic", &ARABIC_FILES[..])]
+    {
+        if let Some(data) = missing.then(|| system_face(files)).flatten() {
+            defs.font_data.insert(key.into(), std::sync::Arc::new(data));
+            if let Some(list) = defs.families.get_mut(&FontFamily::Proportional) {
+                list.push(key.into());
+            }
+        }
+    }
     // A bold family for headings and selected tabs.
-    let mut bold: Vec<String> = names.iter().filter(|(fam, st, _)| *fam == "Inter" && *st == "SemiBold").map(|(_, _, n)| n.clone()).collect();
     bold.extend(defs.families.get(&FontFamily::Proportional).cloned().unwrap_or_default());
     defs.families.insert(FontFamily::Name("bold".into()), bold);
     // Hack is already bundled for Monospace and covers the interface's arrows and triangles.
@@ -251,6 +385,34 @@ pub fn add_fallback_faces(defs: &mut FontDefinitions, faces: &[std::sync::Arc<vs
             list.push(name.clone());
         }
     }
+}
+
+/// Installed CJK fonts to fall back on, relative to a font folder, best first.
+const CJK_FILES: [&str; 8] = [
+    "noto-cjk/NotoSansCJK-Regular.ttc",
+    "opentype/noto/NotoSansCJK-Regular.ttc",
+    "google-noto-sans-cjk-fonts/NotoSansCJK-Regular.ttc",
+    "google-noto-cjk/NotoSansCJK-Regular.ttc",
+    "adobe-source-han-sans/SourceHanSansJP-Regular.otf",
+    "wenquanyi/wqy-microhei/wqy-microhei.ttc",
+    "truetype/wqy/wqy-microhei.ttc",
+    "truetype/droid/DroidSansFallbackFull.ttf",
+];
+
+/// Installed Arabic fonts to fall back on.
+const ARABIC_FILES: [&str; 3] =
+    ["noto/NotoSansArabic-Regular.ttf", "truetype/noto/NotoSansArabic-Regular.ttf", "google-noto-sans-arabic-fonts/NotoSansArabic-Regular.ttf"];
+
+/// The first of `files` found in the system font folders (big collections up to 128 MB).
+fn system_face(files: &[&str]) -> Option<FontData> {
+    let dirs = vslide_fonts::system_font_dirs();
+    files.iter().flat_map(|f| dirs.iter().map(move |d| d.join(f))).find_map(|path| {
+        let size = std::fs::metadata(&path).ok().filter(|m| m.is_file())?.len();
+        if size > 128 << 20 {
+            return None;
+        }
+        std::fs::read(&path).ok().map(FontData::from_owned)
+    })
 }
 
 pub fn bold(size: f32) -> egui::FontId {

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.vyntaris.VSlide</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>LicenseRef-proprietary</project_license>
+  <name>VSlide</name>
+  <summary>The presentations of Vyntaris Office</summary>
+  <developer id="org.vyntaris">
+    <name>Vyntaris</name>
+  </developer>
+  <description>
+    <p>
+      VSlide makes slide decks with layouts, shapes, pictures, charts, video, transitions and
+      animations, presents them full screen, and opens and saves .pptx and PDF. It wears the
+      desktop's GTK theme.
+    </p>
+  </description>
+  <launchable type="desktop-id">org.vyntaris.VSlide.desktop</launchable>
+  <icon type="stock">org.vyntaris.VSlide</icon>
+  <categories>
+    <category>Office</category>
+    <category>Presentation</category>
+  </categories>
+  <supports>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </supports>
+  <provides>
+    <binary>vslide</binary>
+  </provides>
+  <content_rating type="oars-1.1"/>
+</component>

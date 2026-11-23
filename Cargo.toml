@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/*", "apps/*", "xtask"]
+members = ["crates/*", "apps/*", "xtask", "shared/*"]
 default-members = ["crates/*", "apps/vslide", "apps/vslide-cli"]
 
 [workspace.package]
@@ -8,9 +8,21 @@ version = "0.19.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 rust-version = "1.95"
-repository = "https://github.com/storytold/deckcraft"
+repository = "https://github.com/vyntaris/vslide"
 
 [workspace.dependencies]
+# Vyntaris Office: shared by VDoc, VSheet and VSlide.
+vyntaris-gtk-theme = { path = "shared/gtk-theme" }
+vyntaris-office-crypt = { path = "shared/office-crypt" }
+# Password-protected Office files (vyntaris-office-crypt).
+aes = "0.9"
+base64 = "0.22"
+cfb = "0.15"
+getrandom = "0.3"
+hmac = "0.13"
+sha1 = "0.11"
+sha2 = "0.11"
+zeroize = "1"
 # OPC part-name primitives and package reader/writer.
 craft-opc = { git = "https://github.com/storytold/craft-libs", rev = "8048f8ef92da80fb3ce5a056d59ca591ee66faf1", version = "0.1.0" }
 # Compound File Binary directory reads (password-protected deck detection).

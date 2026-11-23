@@ -337,7 +337,26 @@ icons! {
 /// 32 pt and above, never thinner than 1.0.
 fn stroke_width(size: f32) -> f32 {
     let t = ((size - 16.0) / 16.0).clamp(0.0, 1.0);
-    (size / (16.0 + 4.0 * t)).max(1.0)
+    (size / (16.0 + 4.0 * t) * 1.12).max(1.1)
+}
+
+/// An accent in the Vyntaris palette: Catppuccin Mocha's on a dark interface (light ink), Latte's
+/// on a light one.
+pub(crate) fn vyntaris(col: Color32, ink: Color32) -> Color32 {
+    let dark = u16::from(ink.r()) + u16::from(ink.g()) + u16::from(ink.b()) > 3 * 128;
+    let rgb = |m: u32, l: u32| {
+        let v = if dark { m } else { l };
+        Color32::from_rgb((v >> 16) as u8, (v >> 8) as u8, v as u8)
+    };
+    match col {
+        BLUE => rgb(0x89B4FA, 0x1E66F5),
+        ORANGE => rgb(0xFAB387, 0xFE640B),
+        GREEN => rgb(0xA6E3A1, 0x40A02B),
+        PURPLE => rgb(0xCBA6F7, 0x8839EF),
+        RED => rgb(0xF38BA8, 0xD20F39),
+        GOLD => rgb(0xF9E2AF, 0xDF8E1D),
+        other => other,
+    }
 }
 
 /// Paint `icon` into `rect` (square or not; draw centred in the largest square). `ink` is the
@@ -374,9 +393,10 @@ mod tests {
 
     #[test]
     fn stroke_width_scales() {
-        assert!((stroke_width(16.0) - 1.0).abs() < 1e-6);
-        assert!((stroke_width(32.0) - 1.6).abs() < 1e-6);
-        assert!((stroke_width(8.0) - 1.0).abs() < 1e-6);
+        // A little heavier than hairlines (the Vyntaris style): 1.12 × size/16 at 16 pt, size/20 at 32.
+        assert!((stroke_width(16.0) - 1.12).abs() < 1e-6);
+        assert!((stroke_width(32.0) - 1.792).abs() < 1e-5);
+        assert!((stroke_width(8.0) - 1.1).abs() < 1e-6);
     }
 
     #[test]

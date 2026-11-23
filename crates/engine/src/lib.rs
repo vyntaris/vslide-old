@@ -42,6 +42,7 @@ pub use vslide_model as model;
 pub use vslide_pdf as pdf;
 pub use vslide_render as render;
 pub use tools::{Mods, PointerEvent, PointerKind, ToolKind};
+pub use vyntaris_office_crypt::Password;
 
 #[derive(Debug, thiserror::Error)]
 pub enum EngineError {
@@ -237,6 +238,9 @@ pub struct DocState {
     /// The list AutoFormat just started from a typed `* ` or `1. `, so Backspace right after
     /// can put the typed text back.
     pub auto_list: Option<cmd::text::AutoList>,
+    /// The password the presentation was opened with: saving as PowerPoint encrypts it again,
+    /// and no AutoRecover copy (which would be unencrypted) is written.
+    pub password: Option<vyntaris_office_crypt::Password>,
 }
 
 static NEXT_UID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
@@ -266,6 +270,7 @@ impl DocState {
             compare: None,
             last_duplicate: None,
             auto_list: None,
+            password: None,
         }
     }
     pub fn is_dirty(&self) -> bool {

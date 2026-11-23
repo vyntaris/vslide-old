@@ -349,8 +349,10 @@ pub fn level_style(ctx: &Ctx, shape: &Shape, level: u8) -> LevelStyle {
         let r = RunProps { font, fill: st.font_ref.1.clone().map(Fill::solid), ..Default::default() };
         out.run.inherit(&r);
     }
+    // A placeholder ends at the master's title, body or other style; only other shapes (text boxes)
+    // take the presentation's default text style, as PowerPoint has it (one with italics there doesn't
+    // make every title italic)
     add(&mut out, master_list_style(ctx, shape).level(level));
-    add(&mut out, ctx.pres.default_text_style.level(level));
     // Last resort.
     out.run.inherit(&RunProps { size: Some(18.0), font: Some("+mn-lt".into()), bold: Some(false), italic: Some(false), ..Default::default() });
     out.para.inherit(&ParaProps { margin_left: Some(0.0), indent: Some(0.0), align: Some(crate::text::Align::Left), ..Default::default() });

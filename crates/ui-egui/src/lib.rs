@@ -10,9 +10,9 @@
 /// prompt shows both, and an AppImage's menu entry gets the icon.
 #[cfg(not(target_arch = "wasm32"))]
 pub const UPDATE_APP: craft_update::app::App = craft_update::app::App {
-    icon_png: Some(include_bytes!("../../../assets/app-icon/hicolor/128x128/apps/ai.storyteller.vslide.png")),
+    icon_png: Some(include_bytes!("../../../assets/app-icon/hicolor/128x128/apps/org.vyntaris.VSlide.png")),
     accent: Some([0xf0, 0x7a, 0x1e]),
-    ..craft_update::suite::VSLIDE
+    ..craft_update::suite::DECKCRAFT
 };
 
 pub mod backstage;
@@ -37,6 +37,9 @@ pub mod theme;
 pub mod toast;
 pub mod uifonts;
 pub mod widgets;
+
+/// The desktop's GTK theme, followed live (Vyntaris).
+pub use vyntaris_gtk_theme as gtk_theme;
 
 use std::collections::HashMap;
 use std::sync::mpsc::Receiver;
@@ -116,6 +119,7 @@ pub const UI_COMMANDS: &[(&str, &str, Option<&str>, &str)] = &[
     ("view.tab", "Ribbon Tab", None, "{tab}"),
     ("view.collapseRibbon", "Collapse the Ribbon", Some("Cmd+F1"), "{}"),
     ("view.dark", "Dark Mode", None, "{on?: bool}"),
+    ("view.followDesktop", "Follow the Desktop's Theme", None, "{}"),
     ("view.grayscale", "Grayscale", None, "{on?: bool}"),
     ("view.newWindow", "New Window", None, "{on?: bool, slide?: index, delta?: int}"),
     ("show.start", "Slide Show", Some("F5"), "{from?: index, custom?: name}"),

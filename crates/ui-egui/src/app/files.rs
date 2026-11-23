@@ -310,7 +310,15 @@ impl SlideApp {
     }
 
     pub fn open_path(&mut self, path: &str) -> Result<(), String> {
-        self.session.execute("file.open", &json!({"path": path})).map_err(|e| e.to_string())?;
+        let params = json!({"path": path});
+        match self.session.execute("file.open", &params).map_err(|e| e.to_string()) {
+            // password-protected: asks for the password, and opens with it
+            Err(e) if vslide_engine::cmd::file::needs_password(&e) => {
+                self.ask_password("file.open", path, params);
+                return Ok(());
+            }
+            r => r?,
+        };
         self.note_recent(path);
         Ok(())
     }
@@ -456,13 +464,14 @@ impl SlideApp {
 
     pub fn save_as_dialog(&mut self, format: &str) {
         let name = self.session.active().map(|d| d.title()).unwrap_or_else(|| "Presentation".into());
-        let ext = if format == "pptx" { "pptx" } else { "vslide" };
+        let ext = if format == "vslide" { "vslide" } else { "pptx" };
         let suggested = format!("{name}.{ext}");
         if let Some(pick) = self.services.pick_save.as_mut() {
             if let Some(path) = pick(&suggested) {
                 match self.session.execute("file.saveAs", &json!({"path": path})) {
-                    Ok(_) => {
-                        self.set_status(format!("Saved {path}"));
+                    Ok(r) => {
+                        let path = r.get("path").and_then(Value::as_str).map_or(path, str::to_string);
+                        self.set_status(saved_message(&r, &path));
                         self.ui.recent.retain(|p| *p != path);
                         self.ui.recent.insert(0, path);
                     }
@@ -474,7 +483,7 @@ impl SlideApp {
         } else if let Some(dl) = self.services.download.as_mut()
             && let Some(d) = self.session.active()
         {
-            match vslide_engine::cmd::file::save_bytes(&d.doc, ext) {
+            match vslide_engine::cmd::file::doc_bytes(d, ext) {
                 Ok(bytes) => dl(&suggested, &bytes),
                 Err(e) => self.set_status(e.to_string()),
             }
@@ -502,11 +511,15 @@ impl SlideApp {
         }
         if self.session.active().and_then(|d| d.path.clone()).is_some() {
             match self.session.execute("file.save", &json!({})) {
+                Ok(r) if r.get("asked").is_some() => {
+                    let path = r.get("path").and_then(Value::as_str).unwrap_or_default().to_string();
+                    self.set_status(saved_message(&r, &path));
+                }
                 Ok(_) => self.set_status("Saved"),
                 Err(e) => self.set_status(e.to_string()),
             }
         } else {
-            self.save_as_dialog("vslide");
+            self.save_as_dialog("pptx");
         }
     }
 
@@ -603,7 +616,7 @@ impl SlideApp {
                 UiRequest::Message { text } => self.set_status(text),
                 UiRequest::PickFile { purpose } => {
                     if purpose == "saveAs" {
-                        self.save_as_dialog("vslide");
+                        self.save_as_dialog("pptx");
                     }
                 }
                 UiRequest::Media { action, shape, ms } => {
@@ -714,6 +727,7 @@ impl SlideApp {
             self.execute_on_target(&req.target, name, cmd, &params)
         };
         match result {
+            Err(e) if cmd == "file.openBytes" && vslide_engine::cmd::file::needs_password(&e) => self.ask_password(cmd, name, params),
             Err(e) if cmd == "file.openBytes" => self.notify(e),
             Err(e) => self.set_status(e),
             Ok(()) => {}
@@ -870,5 +884,17 @@ mod print_preview_tests {
 
         assert!(!dir.exists());
         std::fs::remove_dir(base).unwrap();
+    }
+}
+
+/// The status after a save; it says so when a PowerPoint 97–2003 name (`.ppt`) was saved as the
+/// PowerPoint file VSlide writes (`.pptx`).
+fn saved_message(r: &Value, path: &str) -> String {
+    match r.get("asked").and_then(Value::as_str) {
+        Some(asked) => {
+            let name = |p: &str| std::path::Path::new(p).file_name().map_or_else(|| p.to_string(), |n| n.to_string_lossy().to_string());
+            format!("Saved as {}: VSlide writes PowerPoint .pptx, not the 97–2003 format of {}", name(path), name(asked))
+        }
+        None => format!("Saved {path}"),
     }
 }

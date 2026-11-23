@@ -10,6 +10,7 @@ use super::grid_options::grid_options;
 use super::hyperlink::{hyperlink_command, hyperlink_seed_of, hyperlink_should_apply};
 use super::language::selected_language;
 use super::paragraph::paragraph_dialog;
+use super::password::password_dialog;
 use super::photo_album::photo_album_dialog;
 use super::preferences::{preferences_snapshot, restore_preferences};
 use super::size_position::size_position_dialog;
@@ -31,6 +32,7 @@ pub(super) fn body(app: &mut SlideApp, ui: &mut Ui, d: &mut Dialog) -> bool {
         "hyperlink" => dlg_hyperlink(app, ui, d),
         "setupShow" => dlg_setup_show(app, ui, d),
         "quit" => dlg_quit(app, ui, d),
+        "password" => password_dialog(app, ui, d),
         "close" => dlg_close(app, ui, d),
         "zoom" => zoom_dialog(app, ui, d),
         "comment" => dlg_comment(app, ui, d),
@@ -1346,7 +1348,11 @@ fn dlg_preferences(app: &mut SlideApp, ui: &mut Ui, d: &mut Dialog) -> bool {
         d.params = json!({ "before": preferences_snapshot(app) });
     }
     ui.label(egui::RichText::new("General").font(theme::bold(13.0)));
-    let mut dark = app.ui.brightness == theme::Brightness::Dark;
+    let mut follow = app.ui.brightness == theme::Brightness::System;
+    if ui.checkbox(&mut follow, "Follow the desktop's theme").changed() {
+        let _ = app.run(if follow { "view.followDesktop" } else { "view.dark" }, json!({"on": app.ui.brightness.is_dark()}));
+    }
+    let mut dark = app.ui.brightness.is_dark();
     if ui.checkbox(&mut dark, "Dark appearance").changed() {
         let _ = app.run("view.dark", json!({"on": dark}));
     }

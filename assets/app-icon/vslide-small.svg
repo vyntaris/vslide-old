@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- VSlide at small sizes: the slide alone -->
+  <path d="M14 4h25l13 13v39a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" fill="#fab387"/>
+  <path d="M10 54v2a4 4 0 0 0 4 4h34a4 4 0 0 0 4-4v-2a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4z" fill="#000" fill-opacity=".18"/>
+  <path d="M39 4l13 13h-9a4 4 0 0 1-4-4z" fill="#fde0cc"/>
+  <rect x="14" y="19" width="34" height="23" rx="3" fill="#fff"/>
+  <rect x="18" y="24" width="16" height="5" rx="2.5" fill="#fab387"/>
+  <rect x="34" y="31" width="10" height="7" rx="2" fill="#fab387"/>
+  <rect x="18" y="33" width="11" height="4" rx="2" fill="#d98e63"/>
+  <rect x="24" y="46" width="14" height="4" rx="2" fill="#fff" fill-opacity=".9"/>
+</svg>

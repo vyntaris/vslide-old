@@ -21,15 +21,12 @@ impl Default for Runtime {
     }
 }
 
-pub(crate) fn enable(app: &mut SlideApp) {
-    app.updates_rt.enabled = true;
-}
+/// Vyntaris updates VSlide with the rest of the system (pacman), so the app never checks itself.
+pub(crate) fn enable(_app: &mut SlideApp) {}
 
-/// Help > Check for Updates…: runs a check and reports the outcome either way.
+/// Help > Check for Updates…: Vyntaris updates VSlide with the rest of the system.
 pub(crate) fn request_check(app: &mut SlideApp) {
-    if !matches!(app.updates_rt.updater.status(), Status::Checking) {
-        app.updates_rt.check_requested = true;
-    }
+    app.set_status("VSlide is updated with the system: sudo pacman -Syu");
 }
 
 /// Starts the helper of an update that is ready, so that it installs once the process has exited.

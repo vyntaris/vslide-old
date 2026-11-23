@@ -233,7 +233,7 @@ impl Pen<'_> {
                 if self.dis {
                     self.ink.gamma_multiply(a * dim)
                 } else {
-                    col.gamma_multiply(a)
+                    super::vyntaris(col, self.ink).gamma_multiply(a)
                 }
             }
             C::White => {

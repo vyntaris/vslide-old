@@ -48,7 +48,9 @@ pub fn choose(display: Option<&str>, wayland: Option<&str>, force_wayland: bool,
 pub fn choose_from_env() -> Choice {
     let display = std::env::var("DISPLAY").ok();
     let wayland = std::env::var("WAYLAND_DISPLAY").ok();
-    choose(display.as_deref(), wayland.as_deref(), std::env::var_os("VSLIDE_WAYLAND").is_some(), |p| p.exists())
+    // Vyntaris: Wayland, at the desktop's own scale, like the other apps; X11 (XWayland) only with
+    // `VSLIDE_X11=1` or without Wayland.
+    choose(display.as_deref(), wayland.as_deref(), std::env::var_os("VSLIDE_X11").is_none(), |p| p.exists())
 }
 
 #[cfg(test)]

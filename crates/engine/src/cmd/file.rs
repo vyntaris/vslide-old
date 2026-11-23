@@ -22,7 +22,7 @@ pub fn specs() -> Vec<CommandSpec> {
             new
         ),
         cmd!(query "file.templates", "Starter Templates", [], None, "{} → [{name, summary, theme, slides}]", always, templates),
-        cmd!(noundo "file.open", "Open…", ["File"], Some("Cmd+O"), "{path}", always, open),
+        cmd!(noundo "file.open", "Open…", ["File"], Some("Cmd+O"), "{path, password?}", always, open),
         cmd!(
             noundo "file.adopt",
             "Open",
@@ -32,7 +32,7 @@ pub fn specs() -> Vec<CommandSpec> {
             always,
             adopt
         ),
-        cmd!(noundo "file.openBytes", "Open Data", [], None, "{name, data: base64}", always, open_bytes),
+        cmd!(noundo "file.openBytes", "Open Data", [], None, "{name, data: base64, password?}", always, open_bytes),
         cmd!(noundo "file.save", "Save", ["File"], Some("Cmd+S"), "{path?, format?: vslide|pptx}", has_doc, save),
         cmd!(noundo "file.saveAs", "Save As…", ["File"], Some("Cmd+Shift+S"), "{path, format?}", has_doc, save_as),
         cmd!(noundo "file.saveTemplate", "Save as Template…", ["File"], None, "{path}", has_doc, save_as),
@@ -127,6 +127,41 @@ fn new(s: &mut Session, p: &Value) -> Result<Value> {
     Ok(out)
 }
 
+/// Does this open error mean the presentation is password-protected and no password was given?
+pub fn needs_password(err: &str) -> bool {
+    err.contains(vyntaris_office_crypt::PASSWORD_REQUIRED)
+}
+
+/// Does this open error mean the password given was wrong?
+pub fn wrong_password(err: &str) -> bool {
+    err.contains(vyntaris_office_crypt::WRONG_PASSWORD)
+}
+
+/// The package inside a password-protected PowerPoint file, decrypted with `password`; `None`
+/// for a file that isn't one. Without the password needed the error satisfies
+/// [`needs_password`]; with a wrong one, [`wrong_password`].
+fn decrypted(name: &str, bytes: &[u8], password: Option<&str>) -> Result<Option<zeroize::Zeroizing<Vec<u8>>>> {
+    if !vyntaris_office_crypt::is_encrypted(bytes) {
+        return Ok(None);
+    }
+    let package = zeroize::Zeroizing::new(vyntaris_office_crypt::decrypt(bytes, password).map_err(|e| match e {
+        vyntaris_office_crypt::CryptError::PasswordRequired | vyntaris_office_crypt::CryptError::WrongPassword => EngineError::Other(format!("{name}: {e}")),
+        e => EngineError::Other(format!("{name}: it is password-protected, and {e}")),
+    })?);
+    if !vslide_pptx::sniff(&package) {
+        return Err(EngineError::Other(format!("{name}: not a presentation VSlide can read")));
+    }
+    Ok(Some(package))
+}
+
+/// [`open_presentation`] for a file that may be password-protected; the result says whether it was.
+pub fn open_presentation_with(name: &str, bytes: &[u8], password: Option<&str>) -> Result<(Presentation, bool)> {
+    match decrypted(name, bytes, password)? {
+        Some(package) => Ok((open_presentation(name, &package)?, true)),
+        None => Ok((open_presentation(name, bytes)?, false)),
+    }
+}
+
 /// Recognise and read presentation bytes (native, PPTX).
 pub fn open_presentation(name: &str, bytes: &[u8]) -> Result<Presentation> {
     open_checked(name, bytes).map(|(p, _)| p)
@@ -166,7 +201,7 @@ fn open_other(name: &str, bytes: &[u8]) -> Result<(Presentation, Vec<String>, Ve
         return Ok((p, lost_slides, warnings));
     }
     if vslide_pptx::is_encrypted(bytes) {
-        return Err(EngineError::Other(format!("{name} is password-protected. VSlide can't open password-protected presentations yet.")));
+        return Err(EngineError::Other(format!("{name}: {}", vyntaris_office_crypt::CryptError::PasswordRequired)));
     }
     if vslide_ppt::sniff(bytes) {
         let (mut p, lost) = vslide_ppt::import_checked(bytes).map_err(|e| match e {
@@ -260,31 +295,51 @@ pub struct LoadedFile {
     pub native: bool,
     /// What the file had lost or damaged.
     pub damaged: Damage,
+    /// The password a password-protected PowerPoint file was opened with: saved with it again.
+    pub password: Option<vyntaris_office_crypt::Password>,
 }
 
 /// Read and parse the presentation at `path`.
 #[cfg(not(target_arch = "wasm32"))]
 pub fn read_presentation_file(path: &str) -> Result<LoadedFile> {
+    read_presentation_file_with(path, None)
+}
+
+/// [`read_presentation_file`] of a file that may be password-protected.
+#[cfg(not(target_arch = "wasm32"))]
+pub fn read_presentation_file_with(path: &str, password: Option<&str>) -> Result<LoadedFile> {
     let bytes = crate::io::read_file(path).map_err(EngineError::Other)?;
-    loaded_file(path, &bytes)
+    loaded_file_with(path, &bytes, password)
 }
 
 /// Parse `bytes` as the presentation file `path`, as [`read_presentation_file`] does after
 /// reading it. The web host bridge uses it for a file its page sent, which then saves back to
 /// that name like a file opened on the desktop.
 pub fn loaded_file(path: &str, bytes: &[u8]) -> Result<LoadedFile> {
+    loaded_file_with(path, bytes, None)
+}
+
+/// [`loaded_file`] of a file that may be password-protected.
+pub fn loaded_file_with(path: &str, bytes: &[u8], password: Option<&str>) -> Result<LoadedFile> {
+    if let Some(package) = decrypted(path, bytes, password)? {
+        let (doc, damaged) = open_checked(path, &package)?;
+        let password = password.map(vyntaris_office_crypt::Password::new);
+        return Ok(LoadedFile { path: path.to_string(), doc, native: true, damaged, password });
+    }
     let (doc, damaged) = open_checked(path, bytes)?;
     let native = vslide_format::sniff(bytes) || vslide_pptx::sniff(bytes);
-    Ok(LoadedFile { path: path.to_string(), doc, native, damaged })
+    Ok(LoadedFile { path: path.to_string(), doc, native, damaged, password: None })
 }
 
 /// Add a loaded presentation as the active document: the shared end of `file.open` and
 /// `file.adopt`. A damaged file opens as an untitled repaired copy, so Save can't overwrite the
 /// original with the empty media.
 fn adopt_loaded(s: &mut Session, f: LoadedFile) -> Result<Value> {
-    let LoadedFile { path, doc, native, damaged } = f;
+    let LoadedFile { path, doc, native, damaged, password } = f;
     let keep_path = native && damaged.is_empty();
     let i = add_opened(s, &path, keep_path.then(|| path.clone()), doc);
+    // opened with a password: saved with it, and never written unencrypted for AutoRecover
+    s.doc_mut()?.password = password;
     report_damage(s, &damaged)?;
     let st = s.doc()?;
     Ok(json!({
@@ -296,7 +351,11 @@ fn adopt_loaded(s: &mut Session, f: LoadedFile) -> Result<Value> {
 #[cfg(not(target_arch = "wasm32"))]
 fn open(s: &mut Session, p: &Value) -> Result<Value> {
     let path = str_param(p, "path").ok_or_else(|| bad("file.open", "missing `path`"))?;
-    adopt_loaded(s, read_presentation_file(path)?)
+    adopt_loaded(s, read_presentation_file_with(path, str_param(p, "password"))?)
+}
+#[cfg(target_arch = "wasm32")]
+fn open(_s: &mut Session, _p: &Value) -> Result<Value> {
+    Err(EngineError::Other("use file.openBytes in the browser".into()))
 }
 
 /// `file.adopt {path, token?}`: add the presentation a host read in the background and staged
@@ -313,16 +372,14 @@ fn adopt(s: &mut Session, p: &Value) -> Result<Value> {
         None => Err(bad("file.adopt", format!("{path} was not loaded"))),
     }
 }
-#[cfg(target_arch = "wasm32")]
-fn open(_s: &mut Session, _p: &Value) -> Result<Value> {
-    Err(EngineError::Other("use file.openBytes in the browser".into()))
-}
 
 fn open_bytes(s: &mut Session, p: &Value) -> Result<Value> {
     let name = str_param(p, "name").unwrap_or("Presentation");
     let data = str_param(p, "data").and_then(base64_decode).ok_or_else(|| bad("file.openBytes", "missing or invalid base64 `data`"))?;
-    let (doc, damaged) = open_checked(name, &data)?;
+    let f = loaded_file_with(name, &data, str_param(p, "password"))?;
+    let (doc, damaged) = (f.doc, f.damaged);
     let i = add_opened(s, name, None, doc);
+    s.doc_mut()?.password = f.password;
     report_damage(s, &damaged)?;
     Ok(
         json!({"document": i, "missingFonts": s.doc()?.missing_fonts, "damagedMedia": damaged.media, "lostSlides": damaged.slides, "importWarnings": damaged.warnings}),
@@ -373,6 +430,19 @@ pub fn save_bytes(doc: &Presentation, format: &str) -> Result<Vec<u8>> {
         "gif" => gif_bytes(doc, &Value::Null),
         "png" | "jpeg" | "jpg" => Err(EngineError::Other("saving a presentation as a single image isn't supported; use file.export".into())),
         _ => vslide_format::save(doc).map_err(|e| EngineError::Other(e.to_string())),
+    }
+}
+
+/// [`save_bytes`] of a document: encrypted with the password it was opened with when the format
+/// is PowerPoint's (the others are VSlide's own or copies).
+pub fn doc_bytes(st: &DocState, format: &str) -> Result<Vec<u8>> {
+    let bytes = save_bytes(&st.doc, format)?;
+    match &st.password {
+        Some(pw) if matches!(format, "pptx" | "potx" | "ppsx") => {
+            let bytes = zeroize::Zeroizing::new(bytes);
+            vyntaris_office_crypt::encrypt(&bytes, pw.as_str()).map_err(|e| EngineError::Other(format!("can't encrypt the presentation: {e}")))
+        }
+        _ => Ok(bytes),
     }
 }
 
@@ -496,6 +566,17 @@ pub fn format_for_path(path: &str) -> &'static str {
     }
 }
 
+/// The PowerPoint 2007+ name for a PowerPoint 97–2003 one (`.ppt`, `.pps`, `.pot`), which VSlide
+/// can't write: saving under such a name used to write VSlide's own format there, a file PowerPoint
+/// can't open. `None` for any other name.
+pub fn modern_powerpoint_path(path: &str) -> Option<String> {
+    let lower = path.to_ascii_lowercase();
+    [(".ppt", ".pptx"), (".pps", ".ppsx"), (".pot", ".potx")]
+        .iter()
+        .find(|(old, _)| lower.ends_with(old))
+        .and_then(|(old, new)| path.get(..path.len() - old.len()).map(|stem| format!("{stem}{new}")))
+}
+
 /// The active presentation is saved as it is now: no unsaved changes, and `path` (when given)
 /// becomes its file. `file.save` calls it after writing; the web host bridge calls it once the
 /// page has the bytes.
@@ -523,11 +604,20 @@ fn save(s: &mut Session, p: &Value) -> Result<Value> {
         s.ui_requests.push(crate::UiRequest::PickFile { purpose: "saveAs".into() });
         return Ok(json!({"needsPath": true}));
     };
+    // A PowerPoint 97–2003 name is saved as the PowerPoint 2007+ file of the same kind.
+    let (path, asked) = match modern_powerpoint_path(&path).filter(|_| str_param(p, "format").is_none()) {
+        Some(modern) => (modern, Some(path)),
+        None => (path, None),
+    };
     let format = str_param(p, "format").unwrap_or(format_for_path(&path));
-    let bytes = save_bytes(&s.doc()?.doc, format)?;
+    let bytes = doc_bytes(s.doc()?, format)?;
     write_file(&path, &bytes)?;
     mark_saved(s, Some(path.clone()))?;
-    Ok(json!({"path": path, "bytes": bytes.len()}))
+    let mut out = json!({"path": path, "bytes": bytes.len()});
+    if let Some(asked) = asked {
+        out["asked"] = json!(asked);
+    }
+    Ok(out)
 }
 
 fn save_as(s: &mut Session, p: &Value) -> Result<Value> {
@@ -540,7 +630,7 @@ fn save_as(s: &mut Session, p: &Value) -> Result<Value> {
 
 fn save_bytes_cmd(s: &mut Session, p: &Value) -> Result<Value> {
     let format = str_param(p, "format").unwrap_or("vslide");
-    let bytes = save_bytes(&s.doc()?.doc, format)?;
+    let bytes = doc_bytes(s.doc()?, format)?;
     Ok(json!({"data": base64_encode(&bytes), "bytes": bytes.len()}))
 }
 

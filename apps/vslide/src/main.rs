@@ -155,7 +155,7 @@ fn display_count(window: &winit::window::Window) -> Option<usize> {
     (n > 0).then_some(n)
 }
 
-const APP_ID: &str = "ai.storyteller.vslide";
+const APP_ID: &str = "org.vyntaris.VSlide";
 
 const USAGE: &str = "\
 Usage: vslide [--control PORT] [--sample] [--show] [FILE...]
@@ -197,7 +197,7 @@ fn startup(mut control_port: Option<u16>, args: impl IntoIterator<Item = String>
 }
 
 fn app_icon() -> Option<egui::IconData> {
-    let png: &[u8] = include_bytes!("../../../assets/app-icon/hicolor/256x256/apps/ai.storyteller.vslide.png");
+    let png: &[u8] = include_bytes!("../../../assets/app-icon/hicolor/256x256/apps/org.vyntaris.VSlide.png");
     eframe::icon_data::from_png_bytes(png).map_err(|e| log::warn!("app icon: {e}")).ok()
 }
 
@@ -291,6 +291,9 @@ fn main() -> eframe::Result {
         options,
         Box::new(move |cc| {
             vslide_ui_egui::install_ime_pass_hooks(&cc.egui_ctx);
+            // The desktop's GTK theme: its colours, followed live (`gtk_theme`).
+            vslide_ui_egui::gtk_theme::enable(&cc.egui_ctx);
+            vslide_ui_egui::theme::refresh_gtk();
             let mut app = SlideApp::new(Session::new(), services(native_wayland));
             // Presenter View asks winit how many displays there are when a show starts.
             #[cfg(all(unix, not(target_os = "macos")))]

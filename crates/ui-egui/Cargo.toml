@@ -17,6 +17,8 @@ vslide-text = { workspace = true }
 vslide-render = { workspace = true }
 vslide-anim = { workspace = true }
 vslide-engine = { workspace = true }
+vyntaris-gtk-theme = { workspace = true }
+vyntaris-office-crypt = { workspace = true }
 vslide-media = { workspace = true }
 egui = { workspace = true, features = ["default_fonts", "monochrome_emoji_fonts"] }
 egui_extras = { workspace = true }

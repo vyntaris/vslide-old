@@ -1,0 +1,21 @@
+[package]
+name = "vyntaris-office-crypt"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Password-protected Office files ([MS-OFFCRYPTO]): agile and standard encryption, shared by VDoc, VSheet and VSlide"
+
+[lints]
+workspace = true
+
+[dependencies]
+quick-xml = { workspace = true }
+thiserror = { workspace = true }
+cfb = { workspace = true }
+aes = { workspace = true }
+sha1 = { workspace = true }
+sha2 = { workspace = true }
+hmac = { workspace = true }
+base64 = { workspace = true }
+getrandom = { workspace = true }
+zeroize = { workspace = true }

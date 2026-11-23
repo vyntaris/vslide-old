@@ -17,6 +17,11 @@ impl SlideApp {
             ctx.request_discard("install interface fonts before layout");
             return false;
         }
+        // The GTK theme changed (the app follows it, `gtk_theme`): its palette goes in again.
+        if crate::gtk_theme::take_changed() {
+            theme::refresh_gtk();
+            self.restyle = true;
+        }
         if self.restyle {
             theme::apply(ctx, &theme::Tokens::for_brightness(self.ui.brightness));
             self.restyle = false;

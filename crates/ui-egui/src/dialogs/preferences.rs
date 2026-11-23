@@ -3,7 +3,8 @@ use super::{Dialog, SlideApp, Value, json, theme};
 /// What the Preferences dialog can change, as it was when the dialog opened.
 pub(super) fn preferences_snapshot(app: &SlideApp) -> Value {
     json!({
-        "dark": app.ui.brightness == theme::Brightness::Dark,
+        "dark": app.ui.brightness.is_dark(),
+        "followDesktop": app.ui.brightness == theme::Brightness::System,
         "uiScale": app.ui.ui_scale,
         "prefs": serde_json::to_value(&app.session.prefs).unwrap_or(Value::Null),
     })
@@ -13,9 +14,12 @@ pub(super) fn preferences_snapshot(app: &SlideApp) -> Value {
 pub(super) fn restore_preferences(app: &mut SlideApp, d: &Dialog) {
     let Some(before) = d.params.get("before") else { return };
     if let Some(dark) = before.get("dark").and_then(Value::as_bool)
-        && dark != (app.ui.brightness == theme::Brightness::Dark)
+        && dark != app.ui.brightness.is_dark()
     {
         let _ = app.run("view.dark", json!({ "on": dark }));
+    }
+    if before.get("followDesktop").and_then(Value::as_bool) == Some(true) {
+        let _ = app.run("view.followDesktop", json!({}));
     }
     if let Some(scale) = before.get("uiScale").and_then(Value::as_f64) {
         app.ui.ui_scale = scale as f32;

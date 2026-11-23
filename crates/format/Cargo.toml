@@ -12,6 +12,7 @@ workspace = true
 craft-deckcraft-format = { workspace = true }
 craft-rtf = { workspace = true }
 vslide-model = { workspace = true }
+zip = { workspace = true }
 
 [dev-dependencies]
 serde_json = { workspace = true }

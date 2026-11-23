@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+Name=VSlide
+GenericName=Presentation
+GenericName[sr]=Презентације
+GenericName[sr@latin]=Prezentacije
+Comment=Make and present slide shows; open and save .pptx
+Comment[sr]=Правите и приказујте презентације; отварајте и чувајте .pptx
+Comment[sr@latin]=Pravite i prikazujte prezentacije; otvarajte i čuvajte .pptx
+Exec=vslide %F
+TryExec=vslide
+Icon=org.vyntaris.VSlide
+Terminal=false
+StartupNotify=true
+StartupWMClass=org.vyntaris.VSlide
+Categories=Office;Presentation;
+Keywords=presentation;slides;slideshow;pptx;deck;prezentacija;slajd;
+MimeType=application/vnd.openxmlformats-officedocument.presentationml.presentation;application/vnd.openxmlformats-officedocument.presentationml.template;application/vnd.openxmlformats-officedocument.presentationml.slideshow;application/vnd.ms-powerpoint;application/vnd.storyteller.deckcraft+zip;application/vnd.vyntaris.vslide+zip;

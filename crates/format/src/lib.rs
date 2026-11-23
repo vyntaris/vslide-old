@@ -18,7 +18,36 @@ use vslide_model::text::{Paragraph, TextBody};
 use vslide_model::{LayoutType, Presentation, ShapeKind, defaults};
 
 // The package itself (identity, manifest, member names, bounded reads) is shared.
-pub use craft_deckcraft_format::{Budget, EXTENSION, FormatError, LEGACY_MIMETYPE, MIMETYPE, Result, VERSION, sniff};
+pub use craft_deckcraft_format::{Budget, EXTENSION, FormatError, LEGACY_MIMETYPE, MIMETYPE, Result, VERSION};
+
+/// The `mimetype` Vyntaris Office's VSlide wrote before it followed DeckCraft's: those files still open.
+pub const VYNTARIS_MIMETYPE: &str = "application/vnd.vyntaris.vslide+zip";
+
+fn vyntaris_file(bytes: &[u8]) -> bool {
+    bytes.starts_with(b"PK") && bytes.windows(VYNTARIS_MIMETYPE.len()).take(200).any(|w| w == VYNTARIS_MIMETYPE.as_bytes())
+}
+
+/// Is this a native presentation (also one Vyntaris Office wrote)?
+pub fn sniff(bytes: &[u8]) -> bool {
+    craft_deckcraft_format::sniff(bytes) || vyntaris_file(bytes)
+}
+
+/// A Vyntaris Office file with today's `mimetype`, the rest copied as it is.
+fn restamp(bytes: &[u8]) -> Result<Vec<u8>> {
+    use std::io::Write;
+    let bad = |e: zip::result::ZipError| FormatError::Damaged(e.to_string());
+    let mut src = zip::ZipArchive::new(std::io::Cursor::new(bytes)).map_err(bad)?;
+    let mut out = zip::ZipWriter::new(std::io::Cursor::new(Vec::new()));
+    out.start_file("mimetype", zip::write::SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored)).map_err(bad)?;
+    out.write_all(MIMETYPE.as_bytes()).map_err(|e| FormatError::Damaged(e.to_string()))?;
+    for i in 0..src.len() {
+        let f = src.by_index_raw(i).map_err(bad)?;
+        if f.name() != "mimetype" {
+            out.raw_copy_file(f).map_err(bad)?;
+        }
+    }
+    Ok(out.finish().map_err(bad)?.into_inner())
+}
 use craft_deckcraft_format::{Member, Package, media_entry};
 
 /// Serialize a presentation.
@@ -76,6 +105,8 @@ pub fn load_checked(bytes: &[u8]) -> Result<(Presentation, Vec<String>)> {
 }
 
 fn load_within(bytes: &[u8], budget: Budget) -> Result<(Presentation, Vec<String>)> {
+    let restamped = if vyntaris_file(bytes) { Some(restamp(bytes)?) } else { None };
+    let bytes = restamped.as_deref().unwrap_or(bytes);
     let (m, mut z) = Package::open_manifest::<Presentation>(bytes, budget.manifest)?;
     let mut p = m.presentation;
     let mut damaged = vec![];

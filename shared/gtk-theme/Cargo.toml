@@ -1,0 +1,13 @@
+[package]
+name = "vyntaris-gtk-theme"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "The desktop's GTK theme colours, read from gtk.css and followed live, for the Vyntaris Office interfaces"
+
+[lints]
+workspace = true
+
+[dependencies]
+egui = { workspace = true }
+log = { workspace = true }

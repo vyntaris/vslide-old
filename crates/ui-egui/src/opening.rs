@@ -92,6 +92,8 @@ impl SlideApp {
                     Err(e) => self.notify(e.to_string()),
                 }
             }
+            // password-protected: asks for the password, and opens with it
+            Err(e) if vslide_engine::cmd::file::needs_password(&e) => self.ask_password("file.open", &o.path, serde_json::json!({"path": o.path})),
             // Over the start screen too, like a failed file.open (#346).
             Err(e) => self.notify(e),
         }

@@ -117,6 +117,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
+name = "aes"
+version = "0.9.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc0fc36d7440d015b45468ba08a21e80e056ebbd014c611c6298bb7503e04bd1"
+dependencies = [
+ "cipher",
+ "cpubits",
+ "cpufeatures 0.3.1",
+]
+
+[[package]]
 name = "ahash"
 version = "0.8.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -240,7 +251,7 @@ dependencies = [
  "objc2-foundation 0.3.2",
  "parking_lot",
  "percent-encoding",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
  "wl-clipboard-rs",
  "x11rb",
 ]
@@ -564,6 +575,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "block-buffer"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2f6c7dbe95a6ed67ad9f18e57daf93a2f034c524b99fd2b76d18fdfeb6660aa"
+dependencies = [
+ "hybrid-array",
+]
+
+[[package]]
 name = "block2"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -713,6 +733,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6d43a04d8753f35258c91f8ec639f792891f748a1edbd759cf1dcea3382ad83c"
 
 [[package]]
+name = "cfb"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0f13298d9178622b7916ec5d01d470425c04273c8ed07e87b1c38b34c4f4612b"
+dependencies = [
+ "fnv",
+ "uuid",
+ "web-time",
+]
+
+[[package]]
 name = "cfg-if"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -745,6 +776,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "cipher"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8cf2a2c93cd704877c0858356ed03480ff301ee950b43f1cbe4573b088bfa6c"
+dependencies = [
+ "crypto-common 0.2.2",
+ "inout",
+]
+
+[[package]]
 name = "clipboard-win"
 version = "5.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -752,6 +793,12 @@ checksum = "bde03770d3df201d4fb868f2c9c59e66a3e4e2bd06692a0fe701e7103c7e84d4"
 dependencies = [
  "error-code",
 ]
+
+[[package]]
+name = "cmov"
+version = "0.5.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c9ea0ac24bc397ab3c98583a3c9ba74fa56b09a4449bbe172b9b1ddb016027a"
 
 [[package]]
 name = "cobs"
@@ -816,6 +863,12 @@ checksum = "4ca0197aee26d1ae37445ee532fefce43251d24cc7c166799f4d46817f1d3973"
 dependencies = [
  "crossbeam-utils",
 ]
+
+[[package]]
+name = "const-oid"
+version = "0.10.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be95d4a884358a21a199689323c29e9256b4a1b315e22f183d155422041d3a9a"
 
 [[package]]
 name = "core-foundation"
@@ -923,10 +976,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "cpubits"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "15b85f9c39137c3a891689859392b1bd49812121d0d61c9caf00d46ed5ce06ae"
+
+[[package]]
 name = "cpufeatures"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "59ed5838eebb26a2bb2e58f6d5b5316989ae9d08bab10e0e6d103e656d1b0280"
+dependencies = [
+ "libc",
+]
+
+[[package]]
+name = "cpufeatures"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ca28b0ae3115b884660db4118d803791fd6756b6e88f39c0f3f7859060d7566"
 dependencies = [
  "libc",
 ]
@@ -1124,7 +1192,7 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
- "sha2",
+ "sha2 0.10.9",
  "tar",
  "tempfile",
  "ureq",
@@ -1255,6 +1323,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "crypto-common"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453"
+dependencies = [
+ "hybrid-array",
+]
+
+[[package]]
+name = "ctutils"
+version = "0.4.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "261af4dc7a06ea8a527a8717d8cbba3417530d6ea14e1edb3de6b67806be474f"
+dependencies = [
+ "cmov",
+]
+
+[[package]]
 name = "cursor-icon"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1265,282 +1351,6 @@ name = "dasp_sample"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c87e182de0887fd5361989c677c4e8f5000cd9491d6d563161a8f3a5519fc7f"
-
-[[package]]
-name = "vslide"
-version = "0.19.0"
-dependencies = [
- "arboard",
- "chrono",
- "cpal",
- "craft-update",
- "vslide-engine",
- "vslide-media",
- "vslide-ui-egui",
- "eframe",
- "egui",
- "fmv-macos-events",
- "image",
- "log",
- "rfd",
- "serde_json",
- "winit",
- "winresource",
-]
-
-[[package]]
-name = "vslide-anim"
-version = "0.19.0"
-dependencies = [
- "vslide-geom",
- "vslide-model",
- "serde",
-]
-
-[[package]]
-name = "vslide-cli"
-version = "0.19.0"
-dependencies = [
- "vslide-engine",
- "vslide-mcp",
- "serde_json",
- "zip 3.0.0",
-]
-
-[[package]]
-name = "vslide-color"
-version = "0.19.0"
-dependencies = [
- "craft-drawingml",
-]
-
-[[package]]
-name = "vslide-engine"
-version = "0.19.0"
-dependencies = [
- "chrono",
- "craft-mime",
- "vslide-anim",
- "vslide-color",
- "vslide-fonts",
- "vslide-format",
- "vslide-geom",
- "vslide-media",
- "vslide-model",
- "vslide-pdf",
- "vslide-ppt",
- "vslide-pptx",
- "vslide-render",
- "vslide-text",
- "i_overlay",
- "image",
- "js-sys",
- "log",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
- "zip 3.0.0",
-]
-
-[[package]]
-name = "vslide-fonts"
-version = "0.19.0"
-dependencies = [
- "epaint_default_fonts",
- "harfrust 0.13.3",
- "kurbo",
- "log",
- "skrifa 0.47.0",
- "unicode-bidi",
-]
-
-[[package]]
-name = "vslide-format"
-version = "0.19.0"
-dependencies = [
- "craft-deckcraft-format",
- "craft-rtf",
- "vslide-model",
- "serde_json",
- "zip 3.0.0",
-]
-
-[[package]]
-name = "vslide-geom"
-version = "0.19.0"
-dependencies = [
- "craft-drawingml",
- "kurbo",
- "serde",
-]
-
-[[package]]
-name = "vslide-mcp"
-version = "0.19.0"
-dependencies = [
- "craft-mcp-server",
- "vslide-engine",
- "vslide-render",
- "log",
- "serde_json",
-]
-
-[[package]]
-name = "vslide-media"
-version = "0.19.0"
-dependencies = [
- "craft-audio",
- "craft-media",
- "craft-video",
- "image",
- "log",
- "symphonia",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "vslide-model"
-version = "0.19.0"
-dependencies = [
- "craft-drawingml",
- "vslide-color",
- "vslide-geom",
- "serde",
- "serde_json",
- "thiserror 2.0.21",
- "unicode-segmentation",
-]
-
-[[package]]
-name = "vslide-pdf"
-version = "0.19.0"
-dependencies = [
- "craft-pdf",
- "vslide-fonts",
- "vslide-model",
- "vslide-render",
- "vslide-text",
- "hayro-syntax",
- "krilla",
- "kurbo",
- "log",
- "serde",
- "thiserror 2.0.21",
- "wasm-bindgen-test",
-]
-
-[[package]]
-name = "vslide-ppt"
-version = "0.19.0"
-dependencies = [
- "vslide-color",
- "vslide-engine",
- "vslide-geom",
- "vslide-model",
- "image",
- "log",
- "miniz_oxide 0.9.1",
- "serde_json",
- "thiserror 2.0.21",
-]
-
-[[package]]
-name = "vslide-pptx"
-version = "0.19.0"
-dependencies = [
- "craft-cfb",
- "craft-drawingml",
- "craft-opc",
- "craft-pptx",
- "craft-xml",
- "vslide-color",
- "vslide-engine",
- "vslide-geom",
- "vslide-model",
- "image",
- "quick-xml 0.41.0",
- "serde_json",
- "thiserror 2.0.21",
- "zip 3.0.0",
-]
-
-[[package]]
-name = "vslide-render"
-version = "0.19.0"
-dependencies = [
- "craft-metafile",
- "vslide-anim",
- "vslide-color",
- "vslide-fonts",
- "vslide-geom",
- "vslide-model",
- "vslide-text",
- "image",
- "kurbo",
- "log",
- "skrifa 0.47.0",
- "vello_common",
- "vello_cpu",
-]
-
-[[package]]
-name = "vslide-text"
-version = "0.19.0"
-dependencies = [
- "chrono",
- "vslide-color",
- "vslide-fonts",
- "vslide-geom",
- "vslide-model",
- "unicode-bidi",
- "unicode-linebreak",
- "unicode-segmentation",
-]
-
-[[package]]
-name = "vslide-ui-egui"
-version = "0.19.0"
-dependencies = [
- "craft-ui",
- "craft-update",
- "vslide-anim",
- "vslide-color",
- "vslide-engine",
- "vslide-fonts",
- "vslide-geom",
- "vslide-media",
- "vslide-model",
- "vslide-render",
- "vslide-text",
- "egui",
- "egui_extras",
- "egui_kittest",
- "log",
- "serde",
- "serde_json",
- "skrifa 0.47.0",
- "toml",
- "web-time",
-]
-
-[[package]]
-name = "vslide-web"
-version = "0.19.0"
-dependencies = [
- "craft-web-api",
- "craft-web-host",
- "vslide-engine",
- "vslide-ui-egui",
- "eframe",
- "egui",
- "js-sys",
- "log",
- "rfd",
- "serde_json",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
 
 [[package]]
 name = "deranged"
@@ -1578,8 +1388,20 @@ version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ed9a281f7bc9b7576e61468ba615a66a5c8cfdff42420a70aa82701a3b1e292"
 dependencies = [
- "block-buffer",
- "crypto-common",
+ "block-buffer 0.10.4",
+ "crypto-common 0.1.7",
+]
+
+[[package]]
+name = "digest"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f1dd6dbb5841937940781866fa1281a1ff7bd3bf827091440879f9994983d5c2"
+dependencies = [
+ "block-buffer 0.12.1",
+ "const-oid",
+ "crypto-common 0.2.2",
+ "ctutils",
 ]
 
 [[package]]
@@ -1940,7 +1762,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2074,6 +1896,12 @@ dependencies = [
  "objc2-app-kit 0.3.2",
  "objc2-foundation 0.3.2",
 ]
+
+[[package]]
+name = "fnv"
+version = "1.0.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "foldhash"
@@ -2513,6 +2341,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
+name = "hmac"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6303bc9732ae41b04cb554b844a762b4115a61bfaa81e3e83050991eeb56863f"
+dependencies = [
+ "digest 0.11.3",
+]
+
+[[package]]
 name = "http"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2527,6 +2364,15 @@ name = "httparse"
 version = "1.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
+
+[[package]]
+name = "hybrid-array"
+version = "0.4.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27f864f10dfb56725ce5ce5472bc52252c8f93a4ab86327122cebf62c5f59a17"
+dependencies = [
+ "typenum",
+]
 
 [[package]]
 name = "i_float"
@@ -2835,6 +2681,15 @@ checksum = "cc4e190f5d26ca7051642629da2c52fc03bde85a03197c99408dcd291734c855"
 dependencies = [
  "equivalent",
  "hashbrown 0.17.1",
+]
+
+[[package]]
+name = "inout"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a580c13f0ffc335ef42dd3f6b1a41b726051c5e1656d9a3aa6fddb3c5dfbbf9"
+dependencies = [
+ "hybrid-array",
 ]
 
 [[package]]
@@ -3363,7 +3218,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3866,7 +3721,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d8fae84b431384b68627d0f9b3b1245fcf9f46f6c0e3dc902e9dce64edd1967"
 dependencies = [
  "libc",
- "windows-sys 0.45.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -4518,7 +4373,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.12.1",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -4575,7 +4430,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -4764,14 +4619,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "sha1"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "aacc4cc499359472b4abe1bf11d0b12e688af9a805fa5e3016f9a386dc2d0214"
+dependencies = [
+ "cfg-if",
+ "cpufeatures 0.3.1",
+ "digest 0.11.3",
+]
+
+[[package]]
 name = "sha2"
 version = "0.10.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a7507d819769d01a365ab707794a4084392c824f54a7a6a7862f8c3d0892b283"
 dependencies = [
  "cfg-if",
- "cpufeatures",
- "digest",
+ "cpufeatures 0.2.17",
+ "digest 0.10.7",
+]
+
+[[package]]
+name = "sha2"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47d7069beb7d6ac7b9acd1039986e73443f24234f41074da099d6f994ac9ad19"
+dependencies = [
+ "cfg-if",
+ "cpufeatures 0.3.1",
+ "digest 0.11.3",
 ]
 
 [[package]]
@@ -5255,10 +5132,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "once_cell",
  "rustix 1.1.5",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -5441,9 +5318,9 @@ dependencies = [
 
 [[package]]
 name = "toml_writer"
-version = "1.1.2+spec-1.1.0"
+version = "1.2.0+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d56353a2a665ad0f41a421187180aab746c8c325620617ad883a99a1cbe66d2"
+checksum = "009dbb7700f11c55ef83aebbe4c0e9cf1f1ac0844bd8d6f00dc38f302026e13a"
 
 [[package]]
 name = "tracing"
@@ -5724,6 +5601,310 @@ name = "version_check"
 version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
+
+[[package]]
+name = "vslide"
+version = "0.19.0"
+dependencies = [
+ "arboard",
+ "chrono",
+ "cpal",
+ "craft-update",
+ "eframe",
+ "egui",
+ "fmv-macos-events",
+ "image",
+ "log",
+ "rfd",
+ "serde_json",
+ "vslide-engine",
+ "vslide-media",
+ "vslide-ui-egui",
+ "winit",
+ "winresource",
+]
+
+[[package]]
+name = "vslide-anim"
+version = "0.19.0"
+dependencies = [
+ "serde",
+ "vslide-geom",
+ "vslide-model",
+]
+
+[[package]]
+name = "vslide-cli"
+version = "0.19.0"
+dependencies = [
+ "serde_json",
+ "vslide-engine",
+ "vslide-mcp",
+ "zip 3.0.0",
+]
+
+[[package]]
+name = "vslide-color"
+version = "0.19.0"
+dependencies = [
+ "craft-drawingml",
+]
+
+[[package]]
+name = "vslide-engine"
+version = "0.19.0"
+dependencies = [
+ "chrono",
+ "craft-mime",
+ "i_overlay",
+ "image",
+ "js-sys",
+ "log",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "vslide-anim",
+ "vslide-color",
+ "vslide-fonts",
+ "vslide-format",
+ "vslide-geom",
+ "vslide-media",
+ "vslide-model",
+ "vslide-pdf",
+ "vslide-ppt",
+ "vslide-pptx",
+ "vslide-render",
+ "vslide-text",
+ "vyntaris-office-crypt",
+ "zeroize",
+ "zip 3.0.0",
+]
+
+[[package]]
+name = "vslide-fonts"
+version = "0.19.0"
+dependencies = [
+ "epaint_default_fonts",
+ "harfrust 0.13.3",
+ "kurbo",
+ "log",
+ "skrifa 0.47.0",
+ "unicode-bidi",
+]
+
+[[package]]
+name = "vslide-format"
+version = "0.19.0"
+dependencies = [
+ "craft-deckcraft-format",
+ "craft-rtf",
+ "serde_json",
+ "vslide-model",
+ "zip 3.0.0",
+]
+
+[[package]]
+name = "vslide-geom"
+version = "0.19.0"
+dependencies = [
+ "craft-drawingml",
+ "kurbo",
+ "serde",
+]
+
+[[package]]
+name = "vslide-mcp"
+version = "0.19.0"
+dependencies = [
+ "craft-mcp-server",
+ "log",
+ "serde_json",
+ "vslide-engine",
+ "vslide-render",
+]
+
+[[package]]
+name = "vslide-media"
+version = "0.19.0"
+dependencies = [
+ "craft-audio",
+ "craft-media",
+ "craft-video",
+ "image",
+ "log",
+ "symphonia",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "vslide-model"
+version = "0.19.0"
+dependencies = [
+ "craft-drawingml",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "unicode-segmentation",
+ "vslide-color",
+ "vslide-geom",
+]
+
+[[package]]
+name = "vslide-pdf"
+version = "0.19.0"
+dependencies = [
+ "craft-pdf",
+ "hayro-syntax",
+ "krilla",
+ "kurbo",
+ "log",
+ "serde",
+ "thiserror 2.0.21",
+ "vslide-fonts",
+ "vslide-model",
+ "vslide-render",
+ "vslide-text",
+ "wasm-bindgen-test",
+]
+
+[[package]]
+name = "vslide-ppt"
+version = "0.19.0"
+dependencies = [
+ "image",
+ "log",
+ "miniz_oxide 0.9.1",
+ "serde_json",
+ "thiserror 2.0.21",
+ "vslide-color",
+ "vslide-engine",
+ "vslide-geom",
+ "vslide-model",
+]
+
+[[package]]
+name = "vslide-pptx"
+version = "0.19.0"
+dependencies = [
+ "craft-cfb",
+ "craft-drawingml",
+ "craft-opc",
+ "craft-pptx",
+ "craft-xml",
+ "image",
+ "quick-xml 0.41.0",
+ "serde_json",
+ "thiserror 2.0.21",
+ "vslide-color",
+ "vslide-engine",
+ "vslide-geom",
+ "vslide-model",
+ "zip 3.0.0",
+]
+
+[[package]]
+name = "vslide-render"
+version = "0.19.0"
+dependencies = [
+ "craft-metafile",
+ "image",
+ "kurbo",
+ "log",
+ "skrifa 0.47.0",
+ "vello_common",
+ "vello_cpu",
+ "vslide-anim",
+ "vslide-color",
+ "vslide-fonts",
+ "vslide-geom",
+ "vslide-model",
+ "vslide-text",
+]
+
+[[package]]
+name = "vslide-text"
+version = "0.19.0"
+dependencies = [
+ "chrono",
+ "unicode-bidi",
+ "unicode-linebreak",
+ "unicode-segmentation",
+ "vslide-color",
+ "vslide-fonts",
+ "vslide-geom",
+ "vslide-model",
+]
+
+[[package]]
+name = "vslide-ui-egui"
+version = "0.19.0"
+dependencies = [
+ "craft-ui",
+ "craft-update",
+ "egui",
+ "egui_extras",
+ "egui_kittest",
+ "log",
+ "serde",
+ "serde_json",
+ "skrifa 0.47.0",
+ "toml",
+ "vslide-anim",
+ "vslide-color",
+ "vslide-engine",
+ "vslide-fonts",
+ "vslide-geom",
+ "vslide-media",
+ "vslide-model",
+ "vslide-render",
+ "vslide-text",
+ "vyntaris-gtk-theme",
+ "vyntaris-office-crypt",
+ "web-time",
+]
+
+[[package]]
+name = "vslide-web"
+version = "0.19.0"
+dependencies = [
+ "craft-web-api",
+ "craft-web-host",
+ "eframe",
+ "egui",
+ "js-sys",
+ "log",
+ "rfd",
+ "serde_json",
+ "vslide-engine",
+ "vslide-ui-egui",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
+name = "vyntaris-gtk-theme"
+version = "0.19.0"
+dependencies = [
+ "egui",
+ "log",
+]
+
+[[package]]
+name = "vyntaris-office-crypt"
+version = "0.19.0"
+dependencies = [
+ "aes",
+ "base64 0.22.1",
+ "cfb",
+ "getrandom 0.3.4",
+ "hmac",
+ "quick-xml 0.41.0",
+ "sha1",
+ "sha2 0.11.1",
+ "thiserror 2.0.21",
+ "zeroize",
+]
 
 [[package]]
 name = "walkdir"
@@ -6220,7 +6401,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
